@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(command -v chromium chromium-browser google-chrome)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(curl -s -o /dev/null -w \"preview:%{http_code}\\\\n\" http://localhost:4173/)",
+      "Bash(node /tmp/claude-1000/-home-fineanmol-Documents-Expense-Tracker/e4d32afc-c75d-4bf0-bc1d-63a5b605c68a/scratchpad/shot.mjs http://localhost:4173 /tmp/claude-1000/-home-fineanmol-Documents-Expense-Tracker/e4d32afc-c75d-4bf0-bc1d-63a5b605c68a/scratchpad)",
+      "Bash(pkill -f \"vite preview\")",
+      "Bash(pkill -f \"google-chrome.*9222\")",
+      "Bash(rm -f src/components/icons/sfIcons.tsx)",
+      "Bash(rmdir src/components/icons)",
+      "Bash(npm install *)"
+    ]
+  }
+}
