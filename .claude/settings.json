@@ -9,7 +9,12 @@
       "Bash(pkill -f \"google-chrome.*9222\")",
       "Bash(rm -f src/components/icons/sfIcons.tsx)",
       "Bash(rmdir src/components/icons)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(curl -s -o /dev/null -w \"dev:%{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(sed -i 's#localhost:4173#localhost:5173#g' /tmp/claude-1000/-home-fineanmol-Documents-Expense-Tracker/e4d32afc-c75d-4bf0-bc1d-63a5b605c68a/scratchpad/pdftest.mjs)",
+      "Bash(rm -rf /tmp/claude-1000/-home-fineanmol-Documents-Expense-Tracker/e4d32afc-c75d-4bf0-bc1d-63a5b605c68a/scratchpad/cp3)",
+      "Bash(node /tmp/claude-1000/-home-fineanmol-Documents-Expense-Tracker/e4d32afc-c75d-4bf0-bc1d-63a5b605c68a/scratchpad/pdftest.mjs)",
+      "Bash(pkill -f \"google-chrome.*922\")"
     ]
   }
 }

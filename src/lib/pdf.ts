@@ -133,7 +133,13 @@ export function parsePdfLines(
     let desc = line;
     for (const t of moneyTokens) desc = desc.replace(t, " ");
     for (const { re } of DATE_PATTERNS) desc = desc.replace(re, " ");
-    desc = desc.replace(/\s+/g, " ").trim() || "Transaction";
+    desc = desc
+      .replace(/[£$€]/g, " ") // stray currency symbols
+      .replace(/[´`^]/g, " ") // encoding artifacts from some PDFs
+      .replace(/\b\d{1,3}(?:,\d{3})*(?:\.\d{2})?\b/g, " ") // leftover bare numbers (balances)
+      .replace(/\s+(DR|CR)\b/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim() || "Transaction";
 
     // determine expense/income. Explicit signals (−, DR, CR, parens) win;
     // otherwise use income keywords; otherwise assume expense (most lines are).
