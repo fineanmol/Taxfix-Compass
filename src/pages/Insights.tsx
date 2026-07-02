@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Search } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -38,6 +39,7 @@ export default function Insights() {
     accountId: "all",
     categoryId: "all",
   });
+  const [merchantQ, setMerchantQ] = useState("");
 
   const dark = isDark(settings?.theme ?? "system");
   // White bars on dark (Quanto look), Shark bars on light.
@@ -62,14 +64,16 @@ export default function Insights() {
   const hide = settings?.hideBalances ?? false;
   const currency = settings?.currency ?? "USD";
 
+  const mq = merchantQ.trim().toLowerCase();
   const matches = (t: Transaction) =>
     (filters.txType === "all" || t.type === filters.txType) &&
     (filters.accountId === "all" || t.accountId === filters.accountId) &&
     (filters.categoryId === "all" || t.categoryId === filters.categoryId) &&
+    (!mq || (t.note ?? "").toLowerCase().includes(mq)) &&
     !t.transferId;
 
-  const filtered = useMemo(() => txs.filter(matches), [txs, filters]);
-  const prevFiltered = useMemo(() => prevTxs.filter(matches), [prevTxs, filters]);
+  const filtered = useMemo(() => txs.filter(matches), [txs, filters, mq]);
+  const prevFiltered = useMemo(() => prevTxs.filter(matches), [prevTxs, filters, mq]);
 
   const total = filtered.reduce((s, t) => s + t.amount, 0);
   const prevTotal = prevFiltered.reduce((s, t) => s + t.amount, 0);
@@ -152,6 +156,22 @@ export default function Insights() {
         accounts={accounts}
         categories={categories}
       />
+
+      {/* merchant search */}
+      <div className="flex items-center gap-2 rounded-xl bg-surface px-3 py-2 shadow-card">
+        <Search size={16} className="text-faint" />
+        <input
+          value={merchantQ}
+          onChange={(e) => setMerchantQ(e.target.value)}
+          placeholder="Filter by merchant (e.g. Advanzia, Rewe)…"
+          className="w-full bg-transparent text-sm text-content outline-none placeholder:text-faint"
+        />
+        {merchantQ && (
+          <button onClick={() => setMerchantQ("")} className="text-xs text-brand-600">
+            Clear
+          </button>
+        )}
+      </div>
 
       {/* daily transaction lists */}
       <section className="space-y-4">

@@ -188,8 +188,9 @@ function groupByDay(txs: Transaction[]): [string, Transaction[]][] {
     const key = String(dayjs(t.date).startOf("day").valueOf());
     (map.get(key) ?? map.set(key, []).get(key)!).push(t);
   }
-  return [...map.entries()]
-    .sort((a, b) => Number(b[0]) - Number(a[0]))
-    .map(([k, v]) => [k, v.sort((x, y) => y.date - x.date)])
-    .slice(0, 60);
+  const entries: [string, Transaction[]][] = [...map.entries()].map(([k, v]) => [
+    k,
+    v.sort((x, y) => y.date - x.date),
+  ]);
+  return entries.sort((a, b) => Number(b[0]) - Number(a[0])).slice(0, 60);
 }
