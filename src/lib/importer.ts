@@ -24,14 +24,29 @@ const KEYWORD_MAP: Array<{ re: RegExp; cat: string }> = [
   { re: /interest|reward|zinsen/i, cat: "Interest" },
 ];
 
-function guessCategory(desc: string, categories: Category[], type: "expense" | "income"): string {
+function guessCategory(
+  desc: string,
+  categories: Category[],
+  type: "expense" | "income",
+  rules: Map<string, string>
+): string {
+  // 1) learned merchant rules win (exact note match, then substring)
+  const key = desc.trim().toLowerCase();
+  if (rules.has(key)) {
+    const id = rules.get(key)!;
+    if (categories.some((c) => c.id === id && c.type === type)) return id;
+  }
+  for (const [merchant, id] of rules) {
+    if (key.includes(merchant) && categories.some((c) => c.id === id && c.type === type)) return id;
+  }
+  // 2) built-in keyword heuristics
   for (const { re, cat } of KEYWORD_MAP) {
     if (re.test(desc)) {
       const match = categories.find((c) => c.name === cat && c.type === type);
       if (match) return match.id;
     }
   }
-  // fall back to "Other" of the right type, else first of that type
+  // 3) fall back to "Other" of the right type, else first of that type
   const other = categories.find((c) => c.name === "Other" && c.type === type);
   return other?.id ?? categories.find((c) => c.type === type)?.id ?? "";
 }
@@ -52,6 +67,7 @@ export async function buildPreview(
   accountId: string
 ): Promise<ImportPreviewRow[]> {
   const categories = await db.categories.toArray();
+  const rules = new Map((await db.merchantRules.toArray()).map((r) => [r.merchant, r.categoryId]));
   const hashes = rows.map((r) => importHash(accountId, r));
   const existing = new Set(
     (await db.transactions.where("importHash").anyOf(hashes).toArray()).map((t) => t.importHash)
@@ -64,7 +80,7 @@ export async function buildPreview(
     const dupInDb = existing.has(hash);
     const dupInFile = seenInFile.has(hash);
     seenInFile.add(hash);
-    const categoryId = guessCategory(r.description, categories, r.type);
+    const categoryId = guessCategory(r.description, categories, r.type, rules);
 
     let skipReason: SkipReason | undefined;
     if (dupInDb) skipReason = "already-imported";

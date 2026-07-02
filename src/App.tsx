@@ -18,6 +18,8 @@ import Categories from "./pages/Categories";
 import QuickAdd from "./pages/QuickAdd";
 import SetupQuickAdd from "./pages/SetupQuickAdd";
 import ImportStatement from "./pages/ImportStatement";
+import Detail from "./pages/Detail";
+import Groups from "./pages/Groups";
 import SettingsPage from "./pages/Settings";
 
 // routes shown full-screen (no bottom tab bar)
@@ -67,6 +69,8 @@ export default function App() {
           <Route path="/accounts" element={<Accounts />} />
           <Route path="/budgets" element={<Budgets />} />
           <Route path="/categories" element={<Categories />} />
+          <Route path="/detail" element={<Detail />} />
+          <Route path="/groups" element={<Groups />} />
           <Route path="/import" element={<ImportStatement />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>

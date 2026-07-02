@@ -5,9 +5,9 @@ import { PeriodSwitcher } from "@/components/PeriodSwitcher";
 import { SpendDonut } from "@/components/SpendDonut";
 import { TransactionRow } from "@/components/TransactionRow";
 import { CategoryIcon } from "@/components/CategoryIcon";
-import { useAccounts, useCategories, useTransactionsInRange } from "@/hooks/useData";
+import { useCategories, useTransactionsInRange } from "@/hooks/useData";
 import { useSettings } from "@/store/useSettings";
-import { accountBalance, spendByCategory, totals, percentChange } from "@/lib/calc";
+import { spendByCategory, totals, percentChange } from "@/lib/calc";
 import { formatMoney, maskMoney } from "@/lib/money";
 import { rangeBounds, prevRangeBounds, prevPeriodLabel, type RangeKey } from "@/lib/dates";
 
@@ -15,7 +15,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const settings = useSettings((s) => s.settings);
   const toggleHide = useSettings((s) => s.toggleHideBalances);
-  const accounts = useAccounts();
   const categories = useCategories();
 
   const [range, setRange] = useState<RangeKey>("month");
@@ -32,25 +31,27 @@ export default function Dashboard() {
   const hide = settings?.hideBalances ?? false;
   const currency = settings?.currency ?? "USD";
 
-  const allTxForBalance = useTransactionsInRange(0, now);
-  const netWorth = accounts.reduce((s, a) => s + accountBalance(a, allTxForBalance), 0);
   const { income, expense } = totals(txs);
   const prevExpense = totals(prevTxs).expense;
   const expensePct = percentChange(expense, prevExpense);
   const slices = spendByCategory(txs);
   const recent = [...txs].sort((a, b) => b.date - a.date).slice(0, 8);
 
+  const net = income - expense;
   const fmt = (n: number) => (hide ? maskMoney(formatMoney(n, currency)) : formatMoney(n, currency));
   const periodWord =
-    range === "week" ? "week" : range === "quarter" ? "quarter" : range === "year" ? "year" : "month";
+    range === "week" ? "last 7 days" : range === "quarter" ? "last 90 days" : range === "year" ? "last year" : "last 30 days";
 
   return (
     <div className="safe-top space-y-4 px-4 pt-4">
-      {/* header row: total balance + hide toggle */}
+      {/* header row: net for the selected window + hide toggle */}
       <header className="flex items-center justify-between">
         <div>
-          <p className="text-xs text-faint">Total balance</p>
-          <p className="text-lg font-semibold text-content">{fmt(netWorth)}</p>
+          <p className="text-xs text-faint">Net · {periodWord}</p>
+          <p className={`text-lg font-semibold ${net >= 0 ? "text-mint" : "text-content"}`}>
+            {net >= 0 ? "+" : "−"}
+            {fmt(Math.abs(net))}
+          </p>
         </div>
         <button
           onClick={toggleHide}
@@ -70,7 +71,7 @@ export default function Dashboard() {
           categories={categories}
           currency={currency}
           hideBalances={hide}
-          centerLabel={`Expenses this ${periodWord}`}
+          centerLabel={`Spent · ${periodWord}`}
           pct={expensePct}
           comparisonLabel={prevPeriodLabel(range, now, monthStart)}
         />
@@ -81,7 +82,11 @@ export default function Dashboard() {
             const cat = categories.find((c) => c.id === s.categoryId);
             const pct = expense ? Math.round((s.total / expense) * 100) : 0;
             return (
-              <div key={s.categoryId} className="flex items-center gap-3 py-1.5">
+              <button
+                key={s.categoryId}
+                onClick={() => navigate(`/detail?category=${s.categoryId}`)}
+                className="flex w-full items-center gap-3 rounded-lg py-1.5 text-left active:bg-surface-2"
+              >
                 <span
                   className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
                   style={{
@@ -97,7 +102,7 @@ export default function Dashboard() {
                 </span>
                 <span className="ml-auto font-semibold text-content">{fmt(s.total)}</span>
                 <span className="w-10 text-right text-xs text-faint">{pct}%</span>
-              </div>
+              </button>
             );
           })}
         </div>

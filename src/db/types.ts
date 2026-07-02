@@ -67,6 +67,25 @@ export interface Recurring {
   createdAt: number;
 }
 
+/** A learned rule: transactions whose note contains `merchant` → this category. */
+export interface MerchantRule {
+  id: string;
+  merchant: string; // lowercased keyword, e.g. "hallesche"
+  categoryId: string;
+  createdAt: number;
+}
+
+/** A user-defined group/tag that clubs categories and/or merchants together. */
+export interface Group {
+  id: string;
+  name: string;
+  color: string;
+  icon: string; // emoji
+  categoryIds: string[];
+  merchants: string[]; // lowercased note keywords, e.g. ["advanzia"]
+  createdAt: number;
+}
+
 export type ThemePref = "light" | "dark" | "system";
 
 export interface Settings {

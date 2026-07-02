@@ -28,3 +28,7 @@ export function useBudgets() {
 export function useRecurring() {
   return useLiveQuery(() => db.recurring.toArray(), [], []);
 }
+
+export function useGroups() {
+  return useLiveQuery(() => db.groups.toArray(), [], []);
+}

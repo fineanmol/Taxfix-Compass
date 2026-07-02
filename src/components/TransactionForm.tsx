@@ -5,7 +5,15 @@ import { NumericKeypad } from "@/components/NumericKeypad";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { useAccounts, useCategories } from "@/hooks/useData";
 import { useSettings } from "@/store/useSettings";
-import { addTransaction, updateTransaction, deleteTransaction } from "@/db/mutations";
+import {
+  addTransaction,
+  updateTransaction,
+  deleteTransaction,
+  merchantKey,
+  countByMerchant,
+  applyCategoryToMerchant,
+  saveMerchantRule,
+} from "@/db/mutations";
 import { currencySymbol } from "@/lib/money";
 import type { Transaction, TxType } from "@/db/types";
 
@@ -61,8 +69,30 @@ export function TransactionForm({
       note: note.trim() || undefined,
       currency,
     };
-    if (initial) await updateTransaction(initial.id, payload);
-    else await addTransaction(payload);
+    if (initial) {
+      const categoryChanged = initial.categoryId !== categoryId;
+      await updateTransaction(initial.id, payload);
+      // when re-categorizing, offer to apply to all same-merchant transactions
+      const merchant = merchantKey(payload.note);
+      if (categoryChanged && merchant) {
+        const others = await countByMerchant(merchant, initial.id);
+        if (
+          others > 0 &&
+          confirm(
+            `Also move the other ${others} “${payload.note}” transaction(s) to this category?\n\n` +
+              `(This also remembers the rule for future imports.)`
+          )
+        ) {
+          await applyCategoryToMerchant(merchant, categoryId);
+          await saveMerchantRule(merchant, categoryId);
+        } else if (categoryChanged) {
+          // still remember the rule so future imports benefit
+          await saveMerchantRule(merchant, categoryId);
+        }
+      }
+    } else {
+      await addTransaction(payload);
+    }
     onDone();
   }
 

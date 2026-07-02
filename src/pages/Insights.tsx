@@ -86,7 +86,7 @@ export default function Insights() {
     <div className="safe-top space-y-4 px-4 pt-4">
       {/* header: leads with the period figure + comparison, like Quanto */}
       <header className="text-center">
-        <p className="text-sm text-faint">{label} this {periodWord(filters.range)}</p>
+        <p className="text-sm text-faint">{label} · {periodWord(filters.range)}</p>
         <p className="text-4xl font-bold tracking-tight text-content">{totalStr}</p>
         <div className="mt-1">
           <ComparisonPill pct={pct} label={prevPeriodLabel(filters.range, now, monthStart)} />
@@ -191,7 +191,13 @@ export default function Insights() {
 }
 
 function periodWord(range: RangeKey): string {
-  return range === "week" ? "week" : range === "quarter" ? "quarter" : range === "year" ? "year" : "month";
+  return range === "week"
+    ? "last 7 days"
+    : range === "quarter"
+      ? "last 90 days"
+      : range === "year"
+        ? "last year"
+        : "last 30 days";
 }
 
 /** Compact axis labels: 30000 -> 30k, 1200000 -> 1.2M */

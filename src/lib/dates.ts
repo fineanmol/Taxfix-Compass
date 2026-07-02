@@ -2,61 +2,56 @@ import dayjs from "dayjs";
 
 export type RangeKey = "week" | "month" | "quarter" | "year";
 
-/** Start/end epoch ms for the given range, anchored on a custom month-start day. */
+const RANGE_DAYS: Record<RangeKey, number> = {
+  week: 7,
+  month: 30,
+  quarter: 90,
+  year: 365,
+};
+
+/**
+ * Rolling-window bounds ending at `ref` (inclusive of today). E.g. "week" =
+ * the last 7 days, "month" = last 30 days. Rolling windows always include
+ * recent activity — unlike calendar periods, which look empty at the start of
+ * a month/year. `monthStartDay` is kept for signature compatibility (unused).
+ */
 export function rangeBounds(
   range: RangeKey,
   ref: number,
-  monthStartDay = 1
+  _monthStartDay = 1
 ): { start: number; end: number } {
-  const d = dayjs(ref);
-  switch (range) {
-    case "week":
-      return { start: d.startOf("week").valueOf(), end: d.endOf("week").valueOf() };
-    case "quarter":
-      return {
-        start: d.startOf("month").subtract((d.month() % 3), "month").valueOf(),
-        end: d.endOf("month").add(2 - (d.month() % 3), "month").valueOf(),
-      };
-    case "year":
-      return { start: d.startOf("year").valueOf(), end: d.endOf("year").valueOf() };
-    case "month":
-    default: {
-      // custom month start: a "month" runs day N → day N-1 of next month
-      let start = d.date(monthStartDay).startOf("day");
-      if (d.date() < monthStartDay) start = start.subtract(1, "month");
-      const end = start.add(1, "month").subtract(1, "millisecond");
-      return { start: start.valueOf(), end: end.valueOf() };
-    }
-  }
+  void _monthStartDay;
+  const end = dayjs(ref).endOf("day");
+  const start = end.subtract(RANGE_DAYS[range] - 1, "day").startOf("day");
+  return { start: start.valueOf(), end: end.valueOf() };
 }
 
-/** Bounds of the period immediately before the given range (same length). */
+/** Bounds of the window immediately before the given range (same length). */
 export function prevRangeBounds(
   range: RangeKey,
   ref: number,
   monthStartDay = 1
 ): { start: number; end: number } {
   const cur = rangeBounds(range, ref, monthStartDay);
-  const unit = range === "quarter" ? 3 : 1;
-  const step = range === "quarter" ? "month" : range;
-  const prevRef = dayjs(cur.start).subtract(unit, step).valueOf();
-  return rangeBounds(range, prevRef, monthStartDay);
+  // previous window of the same length ends the day before the current starts
+  const prevEnd = dayjs(cur.start).subtract(1, "day").valueOf();
+  return rangeBounds(range, prevEnd, monthStartDay);
 }
 
-/** Short label for "vs last <period>" — e.g. the previous month's name. */
-export function prevPeriodLabel(range: RangeKey, ref: number, monthStartDay = 1): string {
-  const prev = prevRangeBounds(range, ref, monthStartDay);
-  const d = dayjs(prev.start);
+/** Short label for "vs previous <period>". */
+export function prevPeriodLabel(range: RangeKey, _ref?: number, _msd?: number): string {
+  void _ref;
+  void _msd;
   switch (range) {
     case "week":
-      return "last week";
+      return "prev 7 days";
     case "quarter":
-      return "last quarter";
+      return "prev 90 days";
     case "year":
-      return d.format("YYYY");
+      return "prev year";
     case "month":
     default:
-      return d.format("MMM");
+      return "prev 30 days";
   }
 }
 

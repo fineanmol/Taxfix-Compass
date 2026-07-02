@@ -3,6 +3,7 @@ import type {
   Account,
   Budget,
   Category,
+  Group,
   Recurring,
   Transaction,
   TxType,
@@ -121,6 +122,58 @@ export async function addCategory(input: Omit<Category, "id" | "order">): Promis
 }
 export const updateCategory = (id: string, patch: Partial<Category>) =>
   db.categories.update(id, patch);
+
+// ---- Merchant categorization ----
+
+/** Normalize a transaction note into a merchant key for matching. */
+export function merchantKey(note?: string): string {
+  return (note ?? "").trim().toLowerCase();
+}
+
+/** How many OTHER transactions share this merchant note (excludes `exceptId`). */
+export async function countByMerchant(merchant: string, exceptId?: string): Promise<number> {
+  const key = merchant.toLowerCase();
+  const all = await db.transactions.toArray();
+  return all.filter((t) => t.id !== exceptId && merchantKey(t.note) === key).length;
+}
+
+/** Set the category on every transaction whose note matches `merchant`. */
+export async function applyCategoryToMerchant(
+  merchant: string,
+  categoryId: string
+): Promise<number> {
+  const key = merchant.toLowerCase();
+  const all = await db.transactions.toArray();
+  const targets = all.filter((t) => merchantKey(t.note) === key);
+  const now = Date.now();
+  await db.transactions.bulkPut(targets.map((t) => ({ ...t, categoryId, updatedAt: now })));
+  return targets.length;
+}
+
+/** Remember merchant → category so future imports auto-categorize it. */
+export async function saveMerchantRule(merchant: string, categoryId: string): Promise<void> {
+  const key = merchant.toLowerCase();
+  if (!key) return;
+  const existing = await db.merchantRules.where("merchant").equals(key).first();
+  if (existing) await db.merchantRules.update(existing.id, { categoryId });
+  else
+    await db.merchantRules.put({
+      id: uid(),
+      merchant: key,
+      categoryId,
+      createdAt: Date.now(),
+    });
+}
+
+// ---- Groups ----
+
+export async function addGroup(input: Omit<Group, "id" | "createdAt">): Promise<string> {
+  const g: Group = { id: uid(), createdAt: Date.now(), ...input };
+  await db.groups.put(g);
+  return g.id;
+}
+export const updateGroup = (id: string, patch: Partial<Group>) => db.groups.update(id, patch);
+export const deleteGroup = (id: string) => db.groups.delete(id);
 
 /** Persist a new ordering for a set of category ids (index becomes `order`). */
 export async function reorderCategories(orderedIds: string[]): Promise<void> {

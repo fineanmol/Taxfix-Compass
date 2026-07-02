@@ -106,6 +106,14 @@ export default function SettingsPage() {
           <ChevronRight size={18} className="text-faint" />
         </button>
         <button
+          onClick={() => navigate("/groups")}
+          className="flex w-full items-center gap-3 py-2.5 text-left"
+        >
+          <Layers size={18} className="text-brand-600" />
+          <span className="flex-1 text-sm text-content">Groups</span>
+          <ChevronRight size={18} className="text-faint" />
+        </button>
+        <button
           onClick={() => navigate("/accounts")}
           className="flex w-full items-center gap-3 py-2.5 text-left"
         >
