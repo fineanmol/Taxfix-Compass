@@ -8,7 +8,8 @@ import { downloadCsv, importCsv } from "@/lib/csv";
 import { loadSampleData } from "@/lib/sampleData";
 import { syncConfigured } from "@/lib/sync";
 import { useSync } from "@/store/useSync";
-import { addRecurring, deleteRecurring } from "@/db/mutations";
+import { addRecurring, deleteRecurring, relabelCurrency } from "@/db/mutations";
+import { db } from "@/db/db";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import type { RecurInterval, ThemePref, TxType } from "@/db/types";
 import dayjs from "dayjs";
@@ -26,6 +27,24 @@ export default function SettingsPage() {
   const [showRecur, setShowRecur] = useState(false);
 
   if (!settings) return null;
+
+  async function onCurrencyChange(next: string) {
+    const prev = settings!.currency;
+    if (next === prev) return;
+    await update({ currency: next });
+    // offer to relabel existing data so amounts show in the new currency
+    const total = await db.transactions.count();
+    if (
+      total > 0 &&
+      confirm(
+        `Show your existing ${total} transaction(s) and accounts in ${next} instead of ${prev}?\n\n` +
+          `This relabels the currency only — amounts stay the same (no exchange-rate conversion).`
+      )
+    ) {
+      const n = await relabelCurrency(next);
+      setImportMsg(`Updated ${n} records to ${next}`);
+    }
+  }
 
   async function onImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -45,7 +64,7 @@ export default function SettingsPage() {
         <Row label="Currency">
           <select
             value={settings.currency}
-            onChange={(e) => update({ currency: e.target.value })}
+            onChange={(e) => onCurrencyChange(e.target.value)}
             className="input w-32"
           >
             {CURRENCIES.map((c) => (

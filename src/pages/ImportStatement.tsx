@@ -149,8 +149,8 @@ export default function ImportStatement() {
         <h1 className="text-2xl font-bold tracking-tight text-content">Import statement</h1>
       </div>
 
-      {/* account selector (shared across steps) */}
-      {step !== "done" && accounts.length > 0 && (
+      {/* account target (shared across steps) */}
+      {step !== "done" && accounts.length > 1 && (
         <div>
           <p className="mb-1 text-xs font-medium text-muted">Import into account</p>
           <select value={accountId} onChange={(e) => setAccountId(e.target.value)} className="input">
@@ -161,6 +161,15 @@ export default function ImportStatement() {
             ))}
           </select>
         </div>
+      )}
+      {/* single account: no picker needed — just say where it goes */}
+      {step !== "done" && accounts.length === 1 && (
+        <p className="text-sm text-muted">
+          Importing into <span className="font-semibold text-content">{accounts[0].name}</span>
+          {accounts[0].currency !== (settings?.currency ?? accounts[0].currency) && (
+            <span className="text-faint"> · {accounts[0].currency}</span>
+          )}
+        </p>
       )}
 
       {step === "pick" && (

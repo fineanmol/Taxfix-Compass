@@ -78,6 +78,28 @@ export async function addTransfer(params: {
   ]);
 }
 
+// ---- Currency ----
+
+/**
+ * Relabel every account, transaction and recurring rule to a new currency code.
+ * This is a display relabel (no FX conversion) — appropriate for a manual
+ * tracker where the user simply wants their money shown in one currency.
+ * Returns how many rows were touched.
+ */
+export async function relabelCurrency(to: string): Promise<number> {
+  return db.transaction("rw", db.accounts, db.transactions, db.recurring, async () => {
+    const [accs, txs, recs] = await Promise.all([
+      db.accounts.toArray(),
+      db.transactions.toArray(),
+      db.recurring.toArray(),
+    ]);
+    await db.accounts.bulkPut(accs.map((a) => ({ ...a, currency: to })));
+    await db.transactions.bulkPut(txs.map((t) => ({ ...t, currency: to, updatedAt: Date.now() })));
+    await db.recurring.bulkPut(recs.map((r) => ({ ...r, currency: to })));
+    return accs.length + txs.length + recs.length;
+  });
+}
+
 // ---- Accounts ----
 
 export async function addAccount(input: Omit<Account, "id" | "createdAt">): Promise<string> {
@@ -99,6 +121,13 @@ export async function addCategory(input: Omit<Category, "id" | "order">): Promis
 }
 export const updateCategory = (id: string, patch: Partial<Category>) =>
   db.categories.update(id, patch);
+
+/** Persist a new ordering for a set of category ids (index becomes `order`). */
+export async function reorderCategories(orderedIds: string[]): Promise<void> {
+  await db.transaction("rw", db.categories, async () => {
+    await Promise.all(orderedIds.map((id, i) => db.categories.update(id, { order: i })));
+  });
+}
 export const deleteCategory = (id: string) => db.categories.delete(id);
 
 // ---- Budgets ----

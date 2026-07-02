@@ -1,6 +1,31 @@
 import { db } from "@/db/db";
 import type { Account, Category, Settings } from "@/db/types";
 import { uid } from "./id";
+import { CURRENCIES } from "./money";
+
+// region → currency, limited to the currencies the app supports
+const REGION_CURRENCY: Record<string, string> = {
+  US: "USD", CA: "CAD", GB: "GBP", AU: "AUD", CH: "CHF", CN: "CNY", JP: "JPY",
+  IN: "INR", AE: "AED",
+  // Euro area
+  DE: "EUR", FR: "EUR", ES: "EUR", IT: "EUR", NL: "EUR", IE: "EUR", PT: "EUR",
+  AT: "EUR", BE: "EUR", FI: "EUR", GR: "EUR", LT: "EUR", LV: "EUR", EE: "EUR",
+  SK: "EUR", SI: "EUR", LU: "EUR", CY: "EUR", MT: "EUR",
+};
+
+/** Guess a supported currency from the browser locale; falls back to USD. */
+function guessLocaleCurrency(): string {
+  try {
+    const region =
+      new Intl.Locale(navigator.language).maximize().region ??
+      navigator.language.split("-")[1]?.toUpperCase();
+    const code = region ? REGION_CURRENCY[region] : undefined;
+    if (code && CURRENCIES.some((c) => c.code === code)) return code;
+  } catch {
+    /* ignore — fall through to USD */
+  }
+  return "USD";
+}
 
 // Emoji icons + Apple system colors — vibrant, native on iPhone.
 const DEFAULT_EXPENSE_CATEGORIES: Array<Pick<Category, "name" | "icon" | "color">> = [
@@ -45,9 +70,14 @@ export async function ensureSeeded(): Promise<void> {
 
   const now = Date.now();
 
+  // Best-effort guess of the user's currency from their locale/timezone, so a
+  // first-run account isn't stuck on USD for EU/UK users. They can change it in
+  // Settings. Falls back to USD.
+  const defaultCurrency = guessLocaleCurrency();
+
   const defaultSettings: Settings = {
     id: "app",
-    currency: "USD",
+    currency: defaultCurrency,
     monthStartDay: 1,
     hideBalances: false,
     syncEnabled: false,
@@ -58,7 +88,7 @@ export async function ensureSeeded(): Promise<void> {
     id: uid(),
     name: "Cash",
     type: "cash",
-    currency: "USD",
+    currency: defaultCurrency, // same as settings so imports show the right currency
     openingBalance: 0,
     createdAt: now,
   };

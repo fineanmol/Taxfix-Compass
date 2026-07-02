@@ -18,11 +18,12 @@ import { formatMoney, maskMoney, CURRENCIES } from "@/lib/money";
 import { PageHeader, IconButton } from "@/components/ui";
 import {
   addAccount,
+  updateAccount,
   deleteAccount,
   addTransfer,
   addCategory,
 } from "@/db/mutations";
-import type { AccountType } from "@/db/types";
+import type { Account, AccountType } from "@/db/types";
 import dayjs from "dayjs";
 
 const ACCOUNT_TYPES: AccountType[] = ["cash", "checking", "savings", "credit", "other"];
@@ -47,6 +48,7 @@ export default function Accounts() {
 
   const [showAdd, setShowAdd] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
+  const [editing, setEditing] = useState<Account | null>(null);
 
   const fmt = (n: number, c: string) =>
     hide ? maskMoney(formatMoney(n, c)) : formatMoney(n, c);
@@ -85,21 +87,23 @@ export default function Accounts() {
           const Icon = meta.icon;
           return (
             <div key={a.id} className="card flex items-center gap-3 p-3.5">
-              <span
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
-                style={{ backgroundColor: meta.color + "22", color: meta.color }}
-              >
-                <Icon size={22} />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold text-content">{a.name}</p>
-                <p className="text-xs capitalize text-faint">
-                  {a.type} · {a.currency}
-                </p>
-              </div>
-              <span className="shrink-0 text-lg font-bold text-content">
-                {fmt(accountBalance(a, allTx), a.currency)}
-              </span>
+              <button onClick={() => setEditing(a)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+                <span
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+                  style={{ backgroundColor: meta.color + "22", color: meta.color }}
+                >
+                  <Icon size={22} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold text-content">{a.name}</p>
+                  <p className="text-xs capitalize text-faint">
+                    {a.type} · {a.currency}
+                  </p>
+                </div>
+                <span className="shrink-0 text-lg font-bold text-content">
+                  {fmt(accountBalance(a, allTx), a.currency)}
+                </span>
+              </button>
               {accounts.length > 1 && (
                 <button
                   onClick={() => {
@@ -118,9 +122,13 @@ export default function Accounts() {
       </div>
 
       {showAdd && (
-        <AddAccountSheet
+        <AccountSheet defaultCurrency={defaultCurrency} onClose={() => setShowAdd(false)} />
+      )}
+      {editing && (
+        <AccountSheet
+          account={editing}
           defaultCurrency={defaultCurrency}
-          onClose={() => setShowAdd(false)}
+          onClose={() => setEditing(null)}
         />
       )}
       {showTransfer && (
@@ -152,14 +160,23 @@ function Sheet({ children, onClose, title }: { children: React.ReactNode; onClos
   );
 }
 
-function AddAccountSheet({ defaultCurrency, onClose }: { defaultCurrency: string; onClose: () => void }) {
-  const [name, setName] = useState("");
-  const [type, setType] = useState<AccountType>("checking");
-  const [currency, setCurrency] = useState(defaultCurrency);
-  const [opening, setOpening] = useState("0");
+function AccountSheet({
+  account,
+  defaultCurrency,
+  onClose,
+}: {
+  account?: Account;
+  defaultCurrency: string;
+  onClose: () => void;
+}) {
+  const [name, setName] = useState(account?.name ?? "");
+  const [type, setType] = useState<AccountType>(account?.type ?? "checking");
+  const [currency, setCurrency] = useState(account?.currency ?? defaultCurrency);
+  const [opening, setOpening] = useState(String(account?.openingBalance ?? 0));
+  const isEdit = !!account;
 
   return (
-    <Sheet title="New account" onClose={onClose}>
+    <Sheet title={isEdit ? "Edit account" : "New account"} onClose={onClose}>
       <div className="space-y-3">
         <Field label="Name">
           <input
@@ -192,17 +209,26 @@ function AddAccountSheet({ defaultCurrency, onClose }: { defaultCurrency: string
         <button
           disabled={!name.trim()}
           onClick={async () => {
-            await addAccount({
-              name: name.trim(),
-              type,
-              currency,
-              openingBalance: Number(opening) || 0,
-            });
+            if (account) {
+              await updateAccount(account.id, {
+                name: name.trim(),
+                type,
+                currency,
+                openingBalance: Number(opening) || 0,
+              });
+            } else {
+              await addAccount({
+                name: name.trim(),
+                type,
+                currency,
+                openingBalance: Number(opening) || 0,
+              });
+            }
             onClose();
           }}
           className="btn-primary w-full disabled:opacity-40"
         >
-          Add account
+          {isEdit ? "Save changes" : "Add account"}
         </button>
       </div>
     </Sheet>

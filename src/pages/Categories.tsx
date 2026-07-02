@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, X, Search } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, X, Search, GripVertical } from "lucide-react";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { IconButton } from "@/components/ui";
+import { DragList } from "@/components/DragList";
 import { useCategories } from "@/hooks/useData";
-import { addCategory, updateCategory, deleteCategory } from "@/db/mutations";
+import { addCategory, updateCategory, deleteCategory, reorderCategories } from "@/db/mutations";
 import { searchEmoji } from "@/lib/emoji";
 import type { Category, TxType } from "@/db/types";
 
@@ -72,31 +73,46 @@ function Group({
   onAdd: () => void;
   onEdit: (c: Category) => void;
 }) {
+  // reorder within this group only; persist the merged order for its ids
+  function handleReorder(orderedIds: string[]) {
+    reorderCategories(orderedIds);
+  }
+
   return (
     <section>
       <div className="mb-1 flex items-center justify-between px-1">
         <h2 className="text-sm font-semibold text-muted">{title}</h2>
         <IconButton icon={Plus} label={`Add ${title} category`} onClick={onAdd} />
       </div>
-      <div className="card divide-y divide-line p-1">
-        {items.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => onEdit(c)}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left active:bg-surface-2"
-          >
-            <span
-              className="flex h-9 w-9 items-center justify-center rounded-lg"
-              style={{ backgroundColor: c.color + "22", color: c.color }}
-            >
-              <CategoryIcon name={c.icon} size={18} />
-            </span>
-            <span className="flex-1 font-medium text-content">{c.name}</span>
-            <span className="text-xs text-faint">Edit</span>
-          </button>
-        ))}
-        {items.length === 0 && (
+      <div className="card p-1">
+        {items.length === 0 ? (
           <p className="px-3 py-4 text-center text-sm text-faint">No categories.</p>
+        ) : (
+          <DragList
+            items={items}
+            onReorder={handleReorder}
+            renderItem={(c) => (
+              <div className="flex items-center gap-2 rounded-xl px-2 py-2.5">
+                <span
+                  data-draghandle
+                  className="cursor-grab touch-none px-1 text-faint active:cursor-grabbing"
+                  aria-label="Drag to reorder"
+                >
+                  <GripVertical size={18} />
+                </span>
+                <button onClick={() => onEdit(c)} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                    style={{ backgroundColor: c.color + "22", color: c.color }}
+                  >
+                    <CategoryIcon name={c.icon} size={18} />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate font-medium text-content">{c.name}</span>
+                  <span className="shrink-0 text-xs text-faint">Edit</span>
+                </button>
+              </div>
+            )}
+          />
         )}
       </div>
     </section>
