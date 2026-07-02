@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
+import { Wallet } from "lucide-react";
 import { BottomTabBar } from "./components/BottomTabBar";
 import { ensureSeeded } from "./lib/seed";
 import { materializeRecurring } from "./lib/recurring";
@@ -39,8 +40,11 @@ export default function App() {
 
   if (!ready) {
     return (
-      <div className="flex h-full items-center justify-center text-brand-600">
-        <div className="animate-pulse text-lg font-semibold">Loading…</div>
+      <div className="flex h-full flex-col items-center justify-center gap-3">
+        <div className="flex h-16 w-16 animate-pulse items-center justify-center rounded-2xl bg-brand-gradient text-white shadow-fab">
+          <Wallet size={30} />
+        </div>
+        <div className="text-xl font-bold tracking-tight text-content">Spend</div>
       </div>
     );
   }

@@ -186,9 +186,12 @@ export default function SettingsPage() {
         </p>
       </Section>
 
-      <p className="pb-2 text-center text-xs text-faint">
-        Privacy-first · your data stays on your device unless you opt into sync.
-      </p>
+      <div className="pb-2 pt-2 text-center">
+        <p className="text-sm font-semibold text-content">Spend</p>
+        <p className="mt-0.5 text-xs text-faint">
+          Privacy-first · your data stays on your device unless you opt into sync.
+        </p>
+      </div>
 
       {showRecur && (
         <AddRecurringSheet

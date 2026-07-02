@@ -14,7 +14,8 @@
       "Bash(sed -i 's#localhost:4173#localhost:5173#g' /tmp/claude-1000/-home-fineanmol-Documents-Expense-Tracker/e4d32afc-c75d-4bf0-bc1d-63a5b605c68a/scratchpad/pdftest.mjs)",
       "Bash(rm -rf /tmp/claude-1000/-home-fineanmol-Documents-Expense-Tracker/e4d32afc-c75d-4bf0-bc1d-63a5b605c68a/scratchpad/cp3)",
       "Bash(node /tmp/claude-1000/-home-fineanmol-Documents-Expense-Tracker/e4d32afc-c75d-4bf0-bc1d-63a5b605c68a/scratchpad/pdftest.mjs)",
-      "Bash(pkill -f \"google-chrome.*922\")"
+      "Bash(pkill -f \"google-chrome.*922\")",
+      "Bash(python3 -m json.tool)"
     ]
   }
 }

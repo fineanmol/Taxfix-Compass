@@ -1,6 +1,6 @@
-# Expense Tracker (Quanto-style PWA)
+# Spend — Expense Tracker
 
-A privacy-first, **manual** personal expense tracker — inspired by
+A privacy-first, **manual** personal expense tracker (PWA) — inspired by
 [Quanto](https://apps.apple.com/us/app/quanto-expense-tracker/id6749017099).
 Fast entry, a clean purple UI, charts & analytics. **No bank syncing.** Your data
 stays on your device unless you opt into cloud sync.
@@ -45,7 +45,7 @@ npm run preview      # serve the production build locally
 
 iOS has no triple-tap-to-launch, but you can wire one yourself:
 
-1. **Shortcuts app** → create a shortcut → *Open URL* → your app's URL → name it (e.g. "Expenses").
+1. **Shortcuts app** → create a shortcut → *Open URL* → your app's URL → name it (e.g. "Spend").
 2. **Settings → Accessibility → Touch → Back Tap → Triple Tap** → choose your shortcut.
 3. Now triple-tapping the back of the iPhone opens the tracker instantly.
 

@@ -13,8 +13,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
-        name: "Quanto Clone — Expense Tracker",
-        short_name: "Expenses",
+        name: "Spend — Expense Tracker",
+        short_name: "Spend",
         description: "Privacy-first manual expense tracker. Your data stays on your device.",
         theme_color: "#0066cc",
         background_color: "#f5f5f7",

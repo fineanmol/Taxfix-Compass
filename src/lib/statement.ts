@@ -170,3 +170,40 @@ export function detectFormat(name: string, text: string): "ofx" | "csv" {
   if (/\.(ofx|qfx)$/i.test(name) || /<OFX>/i.test(text) || /<STMTTRN>/i.test(text)) return "ofx";
   return "csv";
 }
+
+// ---------- Excel (.xlsx / .xls) ----------
+
+/**
+ * Parse the first sheet of an Excel workbook into the same {header, rows} grid
+ * the CSV mapper uses, so Excel reuses the whole column-mapping + preview flow.
+ * Requires the `xlsx` lib passed in (lazy-loaded by the caller to keep it out
+ * of the main bundle).
+ */
+export function parseXlsxGrid(
+  buf: ArrayBuffer,
+  XLSX: typeof import("xlsx")
+): { header: string[]; rows: string[][] } {
+  const wb = XLSX.read(buf, { type: "array", cellDates: true });
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  if (!sheet) return { header: [], rows: [] };
+
+  // rows as arrays; blank cells become ""; dates formatted as YYYY-MM-DD
+  const grid = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
+    header: 1,
+    raw: false,
+    dateNF: "yyyy-mm-dd",
+    defval: "",
+  });
+
+  // find the header row: first row with 2+ non-empty cells (skips title/blank rows)
+  let headerIdx = grid.findIndex((r) => r.filter((c) => String(c).trim()).length >= 2);
+  if (headerIdx < 0) headerIdx = 0;
+
+  const header = (grid[headerIdx] ?? []).map((c) => String(c).trim());
+  const rows = grid
+    .slice(headerIdx + 1)
+    .map((r) => r.map((c) => String(c ?? "").trim()))
+    .filter((r) => r.some((c) => c.length));
+
+  return { header, rows };
+}

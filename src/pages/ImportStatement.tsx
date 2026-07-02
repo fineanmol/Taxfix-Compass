@@ -67,6 +67,31 @@ export default function ImportStatement() {
       return;
     }
 
+    // Excel: parse to a grid, then reuse the CSV column-mapping flow
+    if (/\.(xlsx|xls)$/i.test(file.name) || /sheet|excel/i.test(file.type)) {
+      setBusy(true);
+      try {
+        const [{ parseXlsxGrid }, XLSX] = await Promise.all([
+          import("@/lib/statement"),
+          import("xlsx"),
+        ]);
+        const buf = await file.arrayBuffer();
+        const grid = parseXlsxGrid(buf, XLSX);
+        if (grid.rows.length === 0) {
+          setWarn("No rows found in this spreadsheet. Check it's the statement sheet, not a summary tab.");
+        } else {
+          setCsvGrid(grid);
+          setMapping(guessMapping(grid.header));
+          setStep("map");
+        }
+      } catch {
+        setWarn("Couldn't read this spreadsheet. Try exporting it as CSV instead.");
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
+
     const text = await file.text();
     if (detectFormat(file.name, text) === "ofx") {
       await goPreview(parseOfx(text));
@@ -122,18 +147,18 @@ export default function ImportStatement() {
             {busy ? (
               <>
                 <div className="h-7 w-7 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600" />
-                <span className="font-semibold text-content">Reading PDF…</span>
+                <span className="font-semibold text-content">Reading file…</span>
               </>
             ) : (
               <>
                 <FileUp size={30} className="text-brand-600" />
                 <span className="font-semibold text-content">Choose a statement file</span>
-                <span className="text-sm text-faint">PDF, CSV, or OFX/QFX from your bank or card</span>
+                <span className="text-sm text-faint">PDF, Excel, CSV, or OFX/QFX from your bank or card</span>
               </>
             )}
             <input
               type="file"
-              accept=".pdf,.ofx,.qfx,.csv,application/pdf,text/csv"
+              accept=".pdf,.xlsx,.xls,.ofx,.qfx,.csv,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv"
               onChange={onFile}
               disabled={busy}
               className="hidden"
@@ -150,10 +175,11 @@ export default function ImportStatement() {
           <div className="rounded-xl bg-surface-2 p-3 text-xs leading-relaxed text-faint">
             <p className="mb-1 font-medium text-muted">How it works</p>
             <p>
-              Works with <b>text-based PDF</b> statements (most banks &amp; cards), plus CSV and
-              OFX/QFX. Everything is parsed <b>on your device</b> — nothing is uploaded. PDF layouts
-              vary, so review the parsed rows before importing. Scanned/photo statements without a
-              text layer can't be read; use the CSV/OFX export instead.
+              Works with <b>text-based PDF</b> statements (most banks &amp; cards), plus{" "}
+              <b>Excel</b> (.xlsx/.xls), CSV, and OFX/QFX. Everything is parsed{" "}
+              <b>on your device</b> — nothing is uploaded. PDF and spreadsheet layouts vary, so
+              review the parsed rows before importing. Scanned/photo statements without a text
+              layer can't be read; use the CSV/OFX export instead.
             </p>
           </div>
         </div>
