@@ -73,3 +73,24 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Smooth page transition on tab/route change: a quick fade + tiny rise.
+   Cheap (opacity/transform only), GPU-friendly, no layout thrash. */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.page-enter {
+  animation: page-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: none;
+  }
+}

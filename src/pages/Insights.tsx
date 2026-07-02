@@ -6,6 +6,7 @@ import { ActivityFilters, type Filters, type SortKey } from "@/components/Filter
 import { ActivityChart } from "@/components/ActivityChart";
 import { ComparisonPill } from "@/components/ComparisonPill";
 import { MonthPicker } from "@/components/MonthPicker";
+import { useSwipe } from "@/hooks/useSwipe";
 import {
   useAccounts,
   useCategories,
@@ -46,6 +47,16 @@ export default function Activity() {
   const prevStart = start.subtract(1, "month");
   const prevEnd = start.subtract(1, "millisecond");
 
+  // swipe navigation: left = previous month, right = next month.
+  // (matches Quanto; can't go past the current month into the future.)
+  const thisMonthStart = dayjs().startOf("month").valueOf();
+  const goPrevMonth = () => setMonth(start.subtract(1, "month").valueOf());
+  const goNextMonth = () => {
+    const next = start.add(1, "month").valueOf();
+    if (next <= thisMonthStart) setMonth(next);
+  };
+  const swipe = useSwipe({ onSwipeLeft: goPrevMonth, onSwipeRight: goNextMonth });
+
   const txs = useTransactionsInRange(start.valueOf(), end.valueOf());
   const prevTxs = useTransactionsInRange(prevStart.valueOf(), prevEnd.valueOf());
 
@@ -82,19 +93,22 @@ export default function Activity() {
 
   return (
     <div className="safe-top space-y-5 px-4 pt-3">
-      {/* header: month picker + big total + comparison */}
-      <header className="flex flex-col items-center gap-1.5">
-        <MonthPicker month={activeMonth} onChange={setMonth} />
-        <p className="text-[40px] font-bold leading-none tracking-tight text-content">{totalStr}</p>
-        <ComparisonPill pct={pct} label={prevStart.format("MMM")} />
-      </header>
+      {/* swipeable top region: header + chart. Swipe left → prev month,
+          right → next month (respects the active filters). */}
+      <div {...swipe} className="touch-pan-y space-y-5">
+        <header className="flex flex-col items-center gap-1.5">
+          <MonthPicker month={activeMonth} onChange={setMonth} />
+          <p className="text-[40px] font-bold leading-none tracking-tight text-content">{totalStr}</p>
+          <ComparisonPill pct={pct} label={prevStart.format("MMM")} />
+        </header>
 
-      {/* chart (floats on background, no card) */}
-      {bars.some((b) => b.value > 0) ? (
-        <ActivityChart bars={bars} currency={currency} />
-      ) : (
-        <p className="py-16 text-center text-sm text-faint">No {label.toLowerCase()} this month</p>
-      )}
+        {/* chart (floats on background, no card) */}
+        {bars.some((b) => b.value > 0) ? (
+          <ActivityChart bars={bars} currency={currency} />
+        ) : (
+          <p className="py-16 text-center text-sm text-faint">No {label.toLowerCase()} this month</p>
+        )}
+      </div>
 
       {/* filters + search */}
       <ActivityFilters

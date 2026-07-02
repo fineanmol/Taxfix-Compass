@@ -65,8 +65,9 @@ export default function App() {
 
   return (
     <div className="mx-auto flex min-h-full max-w-md flex-col">
-      <main className={hideTabBar ? "" : "pb-28"}>
-        <Routes>
+      {/* keyed on pathname so each screen re-mounts and plays the enter animation */}
+      <main key={location.pathname} className={`page-enter ${hideTabBar ? "" : "pb-28"}`}>
+        <Routes location={location}>
           <Route path="/" element={<Activity />} />
           <Route path="/summary" element={<Summary />} />
           <Route path="/overview" element={<Overview />} />
