@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { TransactionRow } from "@/components/TransactionRow";
+import { SwipeToDelete } from "@/components/SwipeToDelete";
 import { ActivityFilters, type Filters, type SortKey } from "@/components/FilterChips";
 import { ActivityChart } from "@/components/ActivityChart";
 import { ComparisonPill } from "@/components/ComparisonPill";
@@ -17,6 +18,7 @@ import { useSettings } from "@/store/useSettings";
 import { fmtDayHeader } from "@/lib/dates";
 import { formatMoney, maskMoney } from "@/lib/money";
 import { percentChange } from "@/lib/calc";
+import { deleteTransaction } from "@/db/mutations";
 import type { Transaction } from "@/db/types";
 
 /** Activity: main screen — monthly bar chart + filters + transaction list. */
@@ -107,12 +109,14 @@ export default function Activity() {
           </div>
         </header>
 
-        {/* chart region: fixed height, floats on background (no card) */}
-        <div className="mt-4 flex h-[220px] items-center justify-center">
+        {/* chart region: fixed height, full width, floats on background (no card) */}
+        <div className="mt-4 h-[220px]">
           {bars.some((b) => b.value > 0) ? (
             <ActivityChart bars={bars} currency={currency} height={200} />
           ) : (
-            <p className="text-center text-sm text-faint">No {label.toLowerCase()} this month</p>
+            <div className="flex h-full items-center justify-center">
+              <p className="text-center text-sm text-faint">No {label.toLowerCase()} this month</p>
+            </div>
           )}
         </div>
       </div>
@@ -147,12 +151,14 @@ export default function Activity() {
                 {items.map((tx, i) => (
                   <div key={tx.id}>
                     {i > 0 && <div className="ml-[72px] h-px bg-line" />}
-                    <TransactionRow
-                      tx={tx}
-                      category={categories.find((c) => c.id === tx.categoryId)}
-                      hideBalances={hide}
-                      onClick={() => navigate(`/edit/${tx.id}`)}
-                    />
+                    <SwipeToDelete onDelete={() => deleteTransaction(tx.id)}>
+                      <TransactionRow
+                        tx={tx}
+                        category={categories.find((c) => c.id === tx.categoryId)}
+                        hideBalances={hide}
+                        onClick={() => navigate(`/edit/${tx.id}`)}
+                      />
+                    </SwipeToDelete>
                   </div>
                 ))}
               </div>

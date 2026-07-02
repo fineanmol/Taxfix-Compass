@@ -30,21 +30,29 @@
 html,
 body,
 #root {
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
   margin: 0;
   color: rgb(var(--content));
+  /* solid base color = the gradient's END color, so any over-scroll / bounce
+     area matches the bottom of the gradient (no visible seam or shift) */
   background-color: rgb(var(--bg));
-  background-image: linear-gradient(
-    180deg,
-    rgb(var(--bg-grad)) 0%,
-    rgb(var(--bg)) 42%
-  );
-  background-attachment: fixed;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
+}
+
+/* Fixed full-viewport gradient layer behind all content. Because it's a
+   position:fixed element (not a body background), it never scrolls, never
+   resizes with page content, and stays perfectly stable across tab changes. */
+#root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgb(var(--bg-grad)) 0%, rgb(var(--bg)) 42%);
+  pointer-events: none;
 }
 
 .safe-top {
