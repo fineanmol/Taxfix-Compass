@@ -31,8 +31,11 @@ export default function ImportStatement() {
   const [preview, setPreview] = useState<ImportPreviewRow[]>([]);
   const [imported, setImported] = useState(0);
 
-  const currency = settings?.currency ?? "USD";
   if (!accountId && accounts.length) setAccountId(accounts[0].id);
+  // imported transactions inherit the target account's currency (falling back
+  // to the app's default currency), not a hardcoded one
+  const currency =
+    accounts.find((a) => a.id === accountId)?.currency ?? settings?.currency ?? "USD";
 
   const [busy, setBusy] = useState(false);
   const [warn, setWarn] = useState("");

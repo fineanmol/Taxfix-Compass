@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Download, Upload, RefreshCw, Repeat, Plus, Trash2, Eye, EyeOff, Sun, Moon, Monitor, Sparkles, Shapes, Wallet, ChevronRight, Zap, Landmark } from "lucide-react";
+import { Download, Upload, RefreshCw, Repeat, Plus, Trash2, Eye, EyeOff, Sun, Moon, Monitor, Sparkles, Shapes, Wallet, ChevronRight, Zap, Landmark, Smartphone } from "lucide-react";
 import { useSettings } from "@/store/useSettings";
 import { useAccounts, useCategories, useRecurring } from "@/hooks/useData";
 import { CURRENCIES } from "@/lib/money";
@@ -171,6 +171,14 @@ export default function SettingsPage() {
       {/* quick add / iOS Back Tap */}
       <Section title="Quick add (iOS)">
         <button
+          onClick={() => navigate("/setup-quickadd")}
+          className="flex w-full items-center gap-3 py-2.5 text-left"
+        >
+          <Smartphone size={18} className="text-brand-600" />
+          <span className="flex-1 text-sm text-content">Set up triple-tap quick add</span>
+          <ChevronRight size={18} className="text-faint" />
+        </button>
+        <button
           onClick={() => navigate("/quick")}
           className="flex w-full items-center gap-3 py-2.5 text-left"
         >
@@ -178,12 +186,6 @@ export default function SettingsPage() {
           <span className="flex-1 text-sm text-content">Open quick-add screen</span>
           <ChevronRight size={18} className="text-faint" />
         </button>
-        <p className="py-2 text-xs leading-relaxed text-faint">
-          On iPhone, create a Shortcut that opens{" "}
-          <code className="text-brand-600">/quick</code>, then bind it in{" "}
-          <b>Settings → Accessibility → Touch → Back Tap → Triple Tap</b>. Triple-tapping the
-          back of your phone jumps straight to fast entry.
-        </p>
       </Section>
 
       <div className="pb-2 pt-2 text-center">

@@ -16,6 +16,7 @@ import Accounts from "./pages/Accounts";
 import Budgets from "./pages/Budgets";
 import Categories from "./pages/Categories";
 import QuickAdd from "./pages/QuickAdd";
+import SetupQuickAdd from "./pages/SetupQuickAdd";
 import ImportStatement from "./pages/ImportStatement";
 import SettingsPage from "./pages/Settings";
 
@@ -61,6 +62,7 @@ export default function App() {
           <Route path="/insights" element={<Insights />} />
           <Route path="/add" element={<AddTransaction />} />
           <Route path="/quick" element={<QuickAdd />} />
+          <Route path="/setup-quickadd" element={<SetupQuickAdd />} />
           <Route path="/edit/:id" element={<EditTransaction />} />
           <Route path="/accounts" element={<Accounts />} />
           <Route path="/budgets" element={<Budgets />} />
