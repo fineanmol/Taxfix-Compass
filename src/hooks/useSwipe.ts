@@ -1,11 +1,15 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 /**
- * Horizontal swipe detection for touch + mouse. Returns handlers to spread on
- * an element. Fires onSwipeLeft / onSwipeRight when a mostly-horizontal drag
- * exceeds the threshold. Ignores vertical drags (so page scroll still works).
+ * Horizontal swipe detection for touch. Swipe left → onSwipeLeft, right →
+ * onSwipeRight. Vertical drags are ignored so the page still scrolls.
+ *
+ * Attaches a NON-PASSIVE native touchmove listener (React's synthetic
+ * onTouchMove is passive, so preventDefault there is a no-op). Once a gesture
+ * is clearly horizontal we preventDefault to stop the browser's edge back/
+ * forward navigation. Returns a ref to attach to the swipeable element.
  */
-export function useSwipe({
+export function useSwipe<T extends HTMLElement = HTMLDivElement>({
   onSwipeLeft,
   onSwipeRight,
   threshold = 45,
@@ -14,27 +18,55 @@ export function useSwipe({
   onSwipeRight?: () => void;
   threshold?: number;
 }) {
-  const start = useRef<{ x: number; y: number } | null>(null);
+  const ref = useRef<T | null>(null);
+  // keep latest callbacks without re-binding listeners
+  const cbs = useRef({ onSwipeLeft, onSwipeRight, threshold });
+  cbs.current = { onSwipeLeft, onSwipeRight, threshold };
 
-  const begin = (x: number, y: number) => {
-    start.current = { x, y };
-  };
-  const end = (x: number, y: number) => {
-    if (!start.current) return;
-    const dx = x - start.current.x;
-    const dy = y - start.current.y;
-    start.current = null;
-    // must be mostly horizontal and past the threshold
-    if (Math.abs(dx) < threshold || Math.abs(dx) < Math.abs(dy) * 1.4) return;
-    if (dx < 0) onSwipeLeft?.();
-    else onSwipeRight?.();
-  };
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let startX = 0;
+    let startY = 0;
+    let horizontal = false;
+    let tracking = false;
 
-  return {
-    onTouchStart: (e: React.TouchEvent) => begin(e.touches[0].clientX, e.touches[0].clientY),
-    onTouchEnd: (e: React.TouchEvent) =>
-      end(e.changedTouches[0].clientX, e.changedTouches[0].clientY),
-    onMouseDown: (e: React.MouseEvent) => begin(e.clientX, e.clientY),
-    onMouseUp: (e: React.MouseEvent) => end(e.clientX, e.clientY),
-  };
+    const onStart = (e: TouchEvent) => {
+      tracking = true;
+      horizontal = false;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    };
+    const onMove = (e: TouchEvent) => {
+      if (!tracking) return;
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+      if (!horizontal && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)) {
+        horizontal = true;
+      }
+      // block browser edge-swipe navigation + horizontal page pan for this drag
+      if (horizontal && e.cancelable) e.preventDefault();
+    };
+    const onEnd = (e: TouchEvent) => {
+      if (!tracking) return;
+      tracking = false;
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      const { threshold: th, onSwipeLeft: l, onSwipeRight: r } = cbs.current;
+      if (Math.abs(dx) < th || Math.abs(dx) < Math.abs(dy) * 1.4) return;
+      if (dx > 0) r?.();
+      else l?.();
+    };
+
+    el.addEventListener("touchstart", onStart, { passive: true });
+    el.addEventListener("touchmove", onMove, { passive: false });
+    el.addEventListener("touchend", onEnd, { passive: true });
+    return () => {
+      el.removeEventListener("touchstart", onStart);
+      el.removeEventListener("touchmove", onMove);
+      el.removeEventListener("touchend", onEnd);
+    };
+  }, []);
+
+  return ref;
 }

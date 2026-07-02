@@ -47,7 +47,7 @@ export default function Activity() {
   const prevStart = start.subtract(1, "month");
   const prevEnd = start.subtract(1, "millisecond");
 
-  // swipe navigation: left = previous month, right = next month.
+  // swipe navigation: swipe RIGHT → previous month, swipe LEFT → next month.
   // (matches Quanto; can't go past the current month into the future.)
   const thisMonthStart = dayjs().startOf("month").valueOf();
   const goPrevMonth = () => setMonth(start.subtract(1, "month").valueOf());
@@ -55,7 +55,7 @@ export default function Activity() {
     const next = start.add(1, "month").valueOf();
     if (next <= thisMonthStart) setMonth(next);
   };
-  const swipe = useSwipe({ onSwipeLeft: goPrevMonth, onSwipeRight: goNextMonth });
+  const swipeRef = useSwipe<HTMLDivElement>({ onSwipeRight: goPrevMonth, onSwipeLeft: goNextMonth });
 
   const txs = useTransactionsInRange(start.valueOf(), end.valueOf());
   const prevTxs = useTransactionsInRange(prevStart.valueOf(), prevEnd.valueOf());
@@ -92,22 +92,29 @@ export default function Activity() {
   const label = filters.txType === "income" ? "Income" : "Expenses";
 
   return (
-    <div className="safe-top space-y-5 px-4 pt-3">
-      {/* swipeable top region: header + chart. Swipe left → prev month,
-          right → next month (respects the active filters). */}
-      <div {...swipe} className="touch-pan-y space-y-5">
-        <header className="flex flex-col items-center gap-1.5">
+    <div className="safe-top space-y-5 px-4 pt-6">
+      {/* swipeable top region: header + chart. Swipe right → prev month,
+          left → next month (respects the active filters). Heights are fixed so
+          only the chart/total content changes — the filters & list below never
+          shift when the month changes. */}
+      <div ref={swipeRef} className="touch-pan-y">
+        <header className="flex h-[104px] flex-col items-center justify-center gap-1">
           <MonthPicker month={activeMonth} onChange={setMonth} />
           <p className="text-[40px] font-bold leading-none tracking-tight text-content">{totalStr}</p>
-          <ComparisonPill pct={pct} label={prevStart.format("MMM")} />
+          {/* reserve the comparison row so the header doesn't jump when it's absent */}
+          <div className="flex h-4 items-center">
+            <ComparisonPill pct={pct} label={prevStart.format("MMM")} />
+          </div>
         </header>
 
-        {/* chart (floats on background, no card) */}
-        {bars.some((b) => b.value > 0) ? (
-          <ActivityChart bars={bars} currency={currency} />
-        ) : (
-          <p className="py-16 text-center text-sm text-faint">No {label.toLowerCase()} this month</p>
-        )}
+        {/* chart region: fixed height, floats on background (no card) */}
+        <div className="mt-4 flex h-[220px] items-center justify-center">
+          {bars.some((b) => b.value > 0) ? (
+            <ActivityChart bars={bars} currency={currency} height={200} />
+          ) : (
+            <p className="text-center text-sm text-faint">No {label.toLowerCase()} this month</p>
+          )}
+        </div>
       </div>
 
       {/* filters + search */}
