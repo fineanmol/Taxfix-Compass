@@ -41,6 +41,19 @@ export async function updateTransaction(
   await db.transactions.update(id, { ...patch, updatedAt: Date.now() });
 }
 
+/** Set the category on many transactions at once. */
+export async function bulkSetCategory(ids: string[], categoryId: string): Promise<void> {
+  const now = Date.now();
+  await db.transaction("rw", db.transactions, async () => {
+    await Promise.all(ids.map((id) => db.transactions.update(id, { categoryId, updatedAt: now })));
+  });
+}
+
+/** Delete many transactions at once. */
+export async function bulkDeleteTransactions(ids: string[]): Promise<void> {
+  await db.transactions.bulkDelete(ids);
+}
+
 export async function deleteTransaction(id: string): Promise<void> {
   const tx = await db.transactions.get(id);
   // delete both legs of a transfer together
@@ -77,6 +90,35 @@ export async function addTransfer(params: {
     { id: uid(), type: "expense", accountId: params.fromAccountId, ...base },
     { id: uid(), type: "income", accountId: params.toAccountId, ...base },
   ]);
+}
+
+// ---- Danger zone ----
+
+/** Delete every transaction (keeps accounts, categories, groups, rules). */
+export async function deleteAllTransactions(): Promise<number> {
+  const n = await db.transactions.count();
+  await db.transactions.clear();
+  return n;
+}
+
+/** Wipe ALL data across every table, so the app re-seeds fresh on next load. */
+export async function resetAllData(): Promise<void> {
+  await db.transaction(
+    "rw",
+    [db.transactions, db.accounts, db.categories, db.budgets, db.recurring, db.groups, db.merchantRules, db.settings],
+    async () => {
+      await Promise.all([
+        db.transactions.clear(),
+        db.accounts.clear(),
+        db.categories.clear(),
+        db.budgets.clear(),
+        db.recurring.clear(),
+        db.groups.clear(),
+        db.merchantRules.clear(),
+        db.settings.clear(),
+      ]);
+    }
+  );
 }
 
 // ---- Currency ----

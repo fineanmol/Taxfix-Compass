@@ -6,6 +6,7 @@ import { ensureSeeded } from "./lib/seed";
 import { materializeRecurring } from "./lib/recurring";
 import { useSettings } from "./store/useSettings";
 import { watchSystemTheme } from "./lib/theme";
+import { maybeOfferCurrencyFix } from "./lib/currencyFix";
 
 import Dashboard from "./pages/Dashboard";
 import Insights from "./pages/Insights";
@@ -36,6 +37,8 @@ export default function App() {
       await loadSettings();
       await materializeRecurring();
       setReady(true);
+      // one-time: offer to fix currency if device locale differs from data
+      maybeOfferCurrencyFix();
     })();
     // keep in sync with OS theme changes while in "system" mode
     return watchSystemTheme(() => useSettings.getState().settings?.theme ?? "system");

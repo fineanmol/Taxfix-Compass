@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Download, Upload, RefreshCw, Repeat, Plus, Trash2, Eye, EyeOff, Sun, Moon, Monitor, Sparkles, Shapes, Wallet, ChevronRight, Zap, Landmark, Smartphone, Layers } from "lucide-react";
+import { Download, Upload, RefreshCw, Repeat, Plus, Trash2, Eye, EyeOff, Sun, Moon, Monitor, Sparkles, Shapes, Wallet, ChevronRight, Zap, Landmark, Smartphone, Layers, AlertOctagon } from "lucide-react";
 import { useSettings } from "@/store/useSettings";
 import { useAccounts, useCategories, useRecurring } from "@/hooks/useData";
 import { CURRENCIES } from "@/lib/money";
@@ -8,7 +8,7 @@ import { downloadCsv, importCsv } from "@/lib/csv";
 import { loadSampleData } from "@/lib/sampleData";
 import { syncConfigured } from "@/lib/sync";
 import { useSync } from "@/store/useSync";
-import { addRecurring, deleteRecurring, relabelCurrency } from "@/db/mutations";
+import { addRecurring, deleteRecurring, relabelCurrency, deleteAllTransactions, resetAllData } from "@/db/mutations";
 import { db } from "@/db/db";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import type { RecurInterval, ThemePref, TxType } from "@/db/types";
@@ -215,6 +215,38 @@ export default function SettingsPage() {
           <Zap size={18} className="text-brand-600" />
           <span className="flex-1 text-sm text-content">Open quick-add screen</span>
           <ChevronRight size={18} className="text-faint" />
+        </button>
+      </Section>
+
+      {/* danger zone */}
+      <Section title="Danger zone">
+        <button
+          onClick={async () => {
+            if (confirm("Delete ALL transactions? Accounts, categories and groups are kept. This can't be undone.")) {
+              const n = await deleteAllTransactions();
+              setImportMsg(`Deleted ${n} transactions`);
+            }
+          }}
+          className="flex w-full items-center gap-3 py-2.5 text-left"
+        >
+          <Trash2 size={18} className="text-red-500" />
+          <span className="text-sm text-red-500">Delete all transactions</span>
+        </button>
+        <button
+          onClick={async () => {
+            if (
+              confirm(
+                "Reset EVERYTHING? This wipes all transactions, accounts, categories, groups and settings, then starts fresh. This can't be undone."
+              )
+            ) {
+              await resetAllData();
+              location.reload();
+            }
+          }}
+          className="flex w-full items-center gap-3 py-2.5 text-left"
+        >
+          <AlertOctagon size={18} className="text-red-500" />
+          <span className="text-sm text-red-500">Reset everything (fresh start)</span>
         </button>
       </Section>
 

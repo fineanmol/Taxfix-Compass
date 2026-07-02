@@ -59,6 +59,7 @@ const DEFAULT_INCOME_CATEGORIES: Array<Pick<Category, "name" | "icon" | "color">
   { name: "Investments", icon: "📈", color: "#00C7BE" },
   { name: "Interest", icon: "🏦", color: "#30B0C7" },
   { name: "Refund", icon: "↩️", color: "#FF9500" },
+  { name: "Repayment", icon: "🤝", color: "#32D74B" },
   { name: "Gift", icon: "🎁", color: "#AF52DE" },
   { name: "Other", icon: "📦", color: "#8E8E93" },
 ];
@@ -66,7 +67,11 @@ const DEFAULT_INCOME_CATEGORIES: Array<Pick<Category, "name" | "icon" | "color">
 /** Idempotent: seeds defaults only on first run (empty DB). */
 export async function ensureSeeded(): Promise<void> {
   const settings = await db.settings.get("app");
-  if (settings) return; // already initialized
+  if (settings) {
+    // already initialized — top up any newly-shipped default categories
+    await ensureDefaultCategories();
+    return;
+  }
 
   const now = Date.now();
 
@@ -113,4 +118,25 @@ export async function ensureSeeded(): Promise<void> {
     await db.accounts.put(defaultAccount);
     await db.categories.bulkPut(categories);
   });
+}
+
+/** Add any built-in default categories that don't exist yet (by name+type). */
+async function ensureDefaultCategories(): Promise<void> {
+  const existing = await db.categories.toArray();
+  const has = (name: string, type: "expense" | "income") =>
+    existing.some((c) => c.name === name && c.type === type);
+
+  const toAdd: Category[] = [];
+  let expOrder = existing.filter((c) => c.type === "expense").length;
+  let incOrder = existing.filter((c) => c.type === "income").length;
+
+  for (const c of DEFAULT_EXPENSE_CATEGORIES) {
+    if (!has(c.name, "expense"))
+      toAdd.push({ id: uid(), type: "expense", order: expOrder++, ...c });
+  }
+  for (const c of DEFAULT_INCOME_CATEGORIES) {
+    if (!has(c.name, "income"))
+      toAdd.push({ id: uid(), type: "income", order: incOrder++, ...c });
+  }
+  if (toAdd.length) await db.categories.bulkPut(toAdd);
 }

@@ -19,7 +19,10 @@
       "Bash(sed -i \"s#import\\('xlsx'\\)#import\\('/node_modules/xlsx/xlsx.mjs'\\)#\" /tmp/claude-1000/-home-fineanmol-Documents-Expense-Tracker/e4d32afc-c75d-4bf0-bc1d-63a5b605c68a/scratchpad/xlsxtest.mjs)",
       "Bash(rm -rf /tmp/claude-1000/-home-fineanmol-Documents-Expense-Tracker/e4d32afc-c75d-4bf0-bc1d-63a5b605c68a/scratchpad/cp5)",
       "Bash(node /tmp/claude-1000/-home-fineanmol-Documents-Expense-Tracker/e4d32afc-c75d-4bf0-bc1d-63a5b605c68a/scratchpad/xlsxtest.mjs)",
-      "Bash(pkill -f \"google-chrome.*923\")"
+      "Bash(pkill -f \"google-chrome.*923\")",
+      "Bash(pkill -f \"google-chrome.*92\")",
+      "Bash(rm -rf /tmp/claude-1000/-home-fineanmol-Documents-Expense-Tracker/e4d32afc-c75d-4bf0-bc1d-63a5b605c68a/scratchpad/cp[A-Z])",
+      "Bash(rm -rf /tmp/claude-1000/-home-fineanmol-Documents-Expense-Tracker/e4d32afc-c75d-4bf0-bc1d-63a5b605c68a/scratchpad/cpX*)"
     ]
   }
 }
