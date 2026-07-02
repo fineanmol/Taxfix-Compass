@@ -7,14 +7,13 @@ import { useCategories } from "@/hooks/useData";
 import { addCategory, updateCategory, deleteCategory } from "@/db/mutations";
 import type { Category, TxType } from "@/db/types";
 
-// icon names available in the picker (must exist in CategoryIcon's map)
+// emoji available in the picker
 const ICON_CHOICES = [
-  "UtensilsCrossed", "Coffee", "ShoppingCart", "ShoppingBag", "Shirt",
-  "Car", "Fuel", "Plane", "Home", "Zap",
-  "ReceiptText", "Smartphone", "Clapperboard", "Dumbbell", "HeartPulse",
-  "GraduationCap", "PawPrint", "Baby", "Gift", "Briefcase",
-  "Wallet", "PiggyBank", "Landmark", "CreditCard", "Banknote",
-  "TrendingUp", "MoreHorizontal",
+  "🍔", "🍕", "🍜", "☕", "🍺", "🛒", "🛍️", "👕", "👟", "💄",
+  "🚗", "⛽", "🚌", "🚕", "✈️", "🏠", "💡", "🧾", "📱", "💻",
+  "🎬", "🎮", "🎵", "📚", "🎓", "🏋️", "❤️‍🩹", "💊", "🐾", "🍼",
+  "🎁", "💇", "🏛️", "🔁", "💰", "💼", "🏢", "📈", "🏦", "↩️",
+  "💳", "💵", "🎉", "🏖️", "⚽", "🚿", "🔧", "🌱", "📦", "⭐",
 ];
 
 const COLOR_CHOICES = [
@@ -121,7 +120,7 @@ function CategorySheet({
   onClose: () => void;
 }) {
   const [name, setName] = useState(category?.name ?? "");
-  const [icon, setIcon] = useState(category?.icon ?? "MoreHorizontal");
+  const [icon, setIcon] = useState(category?.icon ?? "📦");
   const [color, setColor] = useState(category?.color ?? COLOR_CHOICES[6]);
 
   async function save() {
@@ -184,23 +183,30 @@ function CategorySheet({
           ))}
         </div>
 
-        {/* icon picker */}
+        {/* emoji picker */}
         <p className="mb-1.5 text-xs font-medium text-muted">Icon</p>
-        <div className="mb-4 grid grid-cols-6 gap-2">
+        <div className="mb-4 grid grid-cols-8 gap-1.5">
           {ICON_CHOICES.map((ic) => (
             <button
               key={ic}
               onClick={() => setIcon(ic)}
-              className={`flex h-11 items-center justify-center rounded-xl transition ${
-                icon === ic ? "text-white" : "bg-surface-2 text-muted"
+              className={`flex h-9 items-center justify-center rounded-lg transition ${
+                icon === ic ? "bg-surface-2 ring-2 ring-brand-500" : "bg-surface-2"
               }`}
-              style={icon === ic ? { backgroundColor: color } : undefined}
               aria-label={ic}
             >
               <CategoryIcon name={ic} size={20} />
             </button>
           ))}
         </div>
+        {/* allow any emoji via the keyboard's emoji key */}
+        <input
+          value={icon}
+          onChange={(e) => setIcon(e.target.value.slice(0, 4))}
+          placeholder="Or type/paste any emoji"
+          className="input mb-4 text-center text-lg"
+          maxLength={4}
+        />
 
         <div className="flex gap-2">
           <button onClick={save} disabled={!name.trim()} className="btn-primary flex-1 disabled:opacity-40">

@@ -28,10 +28,14 @@ function guessCategory(desc: string, categories: Category[], type: "expense" | "
   return other?.id ?? categories.find((c) => c.type === type)?.id ?? "";
 }
 
+export type SkipReason = "already-imported" | "duplicate-in-file" | "no-category";
+
 export interface ImportPreviewRow extends ParsedRow {
   hash: string;
   categoryId: string;
   duplicate: boolean;
+  /** why this row won't import (undefined = it will import) */
+  skipReason?: SkipReason;
 }
 
 /** Build a preview: attach category guesses + dedup flags without writing. */
@@ -52,12 +56,14 @@ export async function buildPreview(
     const dupInDb = existing.has(hash);
     const dupInFile = seenInFile.has(hash);
     seenInFile.add(hash);
-    return {
-      ...r,
-      hash,
-      categoryId: guessCategory(r.description, categories, r.type),
-      duplicate: dupInDb || dupInFile,
-    };
+    const categoryId = guessCategory(r.description, categories, r.type);
+
+    let skipReason: SkipReason | undefined;
+    if (dupInDb) skipReason = "already-imported";
+    else if (dupInFile) skipReason = "duplicate-in-file";
+    else if (!categoryId) skipReason = "no-category";
+
+    return { ...r, hash, categoryId, duplicate: !!skipReason, skipReason };
   });
 }
 

@@ -1,75 +1,64 @@
-import {
-  UtensilsCrossed,
-  ShoppingCart,
-  Car,
-  ShoppingBag,
-  ReceiptText,
-  Clapperboard,
-  HeartPulse,
-  Home,
-  Plane,
-  MoreHorizontal,
-  Wallet,
-  Gift,
-  TrendingUp,
-  ArrowLeftRight,
-  Circle,
-  Coffee,
-  Fuel,
-  Dumbbell,
-  GraduationCap,
-  PawPrint,
-  Shirt,
-  Smartphone,
-  Zap,
-  Baby,
-  Briefcase,
-  PiggyBank,
-  Landmark,
-  CreditCard,
-  Banknote,
-  type LucideIcon,
-} from "lucide-react";
-
-/** Map of stored icon names → real Lucide icons. */
-const ICONS: Record<string, LucideIcon> = {
-  UtensilsCrossed,
-  ShoppingCart,
-  Car,
-  ShoppingBag,
-  ReceiptText,
-  Clapperboard,
-  HeartPulse,
-  Home,
-  Plane,
-  MoreHorizontal,
-  Wallet,
-  Gift,
-  TrendingUp,
-  ArrowLeftRight,
-  Circle,
-  Coffee,
-  Fuel,
-  Dumbbell,
-  GraduationCap,
-  PawPrint,
-  Shirt,
-  Smartphone,
-  Zap,
-  Baby,
-  Briefcase,
-  PiggyBank,
-  Landmark,
-  CreditCard,
-  Banknote,
+/**
+ * Category icons are now emoji stored directly in the category's `icon` field
+ * (e.g. "🍔"). For data seeded before the switch — which stored Lucide names
+ * like "UtensilsCrossed" — we map the old names to an emoji so nothing breaks.
+ */
+const LEGACY_NAME_TO_EMOJI: Record<string, string> = {
+  UtensilsCrossed: "🍔",
+  ShoppingCart: "🛒",
+  Car: "🚗",
+  ShoppingBag: "🛍️",
+  ReceiptText: "🧾",
+  Clapperboard: "🎬",
+  HeartPulse: "❤️‍🩹",
+  Home: "🏠",
+  Plane: "✈️",
+  MoreHorizontal: "📦",
+  Wallet: "💰",
+  Gift: "🎁",
+  TrendingUp: "📈",
+  ArrowLeftRight: "🔄",
+  Circle: "⚪",
+  Coffee: "☕",
+  Fuel: "⛽",
+  Dumbbell: "🏋️",
+  GraduationCap: "🎓",
+  PawPrint: "🐾",
+  Shirt: "👕",
+  Smartphone: "📱",
+  Zap: "⚡",
+  Baby: "🍼",
+  Briefcase: "💼",
+  PiggyBank: "🐷",
+  Landmark: "🏦",
+  CreditCard: "💳",
+  Banknote: "💵",
 };
 
-/** Render a real Lucide icon by its stored name (falls back to a dot). */
+/** Resolve a stored icon value to an emoji (handles emoji or legacy names). */
+export function resolveEmoji(icon: string): string {
+  if (!icon) return "📦";
+  // if it maps from a legacy Lucide name, convert; otherwise assume it's emoji
+  return LEGACY_NAME_TO_EMOJI[icon] ?? icon;
+}
+
+/** Render a category's emoji at a given pixel size. */
 export function CategoryIcon({
   name,
   size = 24,
-  ...props
-}: { name: string; size?: number } & React.ComponentProps<LucideIcon>) {
-  const Cmp = ICONS[name] ?? Circle;
-  return <Cmp size={size} absoluteStrokeWidth strokeWidth={2.25} {...props} />;
+  className,
+}: {
+  name: string;
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <span
+      className={className}
+      style={{ fontSize: size, lineHeight: 1, display: "inline-block" }}
+      aria-hidden
+    >
+      {resolveEmoji(name)}
+    </span>
+  );
 }

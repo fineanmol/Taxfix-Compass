@@ -227,7 +227,7 @@ function TransferSheet({
   async function ensureTransferCategory(): Promise<string> {
     const existing = categories.find((c) => c.name === "Transfer");
     if (existing) return existing.id;
-    return addCategory({ name: "Transfer", icon: "ArrowLeftRight", color: "#0066cc", type: "expense" });
+    return addCategory({ name: "Transfer", icon: "🔄", color: "#0066cc", type: "expense" });
   }
 
   return (

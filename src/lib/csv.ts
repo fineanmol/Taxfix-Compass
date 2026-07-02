@@ -125,7 +125,7 @@ export async function importCsv(text: string): Promise<ImportResult> {
   await db.transaction("rw", db.categories, db.accounts, async () => {
     let order = categories.length;
     for (const c of toCreateCats.values()) {
-      const cat = { id: uid(), name: c.name, icon: "Circle", color: "#0066cc", type: c.type, order: order++ };
+      const cat = { id: uid(), name: c.name, icon: "📦", color: "#0066cc", type: c.type, order: order++ };
       await db.categories.put(cat);
       catByName.set(c.name.toLowerCase(), cat);
     }

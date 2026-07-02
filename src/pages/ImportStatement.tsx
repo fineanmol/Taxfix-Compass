@@ -14,7 +14,18 @@ import {
   type CsvMapping,
   type ParsedRow,
 } from "@/lib/statement";
-import { buildPreview, commitImport, type ImportPreviewRow } from "@/lib/importer";
+import { buildPreview, commitImport, type ImportPreviewRow, type SkipReason } from "@/lib/importer";
+
+function skipLabel(reason: SkipReason): string {
+  switch (reason) {
+    case "already-imported":
+      return "Already imported";
+    case "duplicate-in-file":
+      return "Duplicate in file";
+    case "no-category":
+      return "No category";
+  }
+}
 
 type Step = "pick" | "map" | "preview" | "done";
 
@@ -114,6 +125,14 @@ export default function ImportStatement() {
 
   const importable = useMemo(() => preview.filter((r) => !r.duplicate), [preview]);
   const dupes = preview.length - importable.length;
+  const skipCounts = useMemo(
+    () => ({
+      alreadyImported: preview.filter((r) => r.skipReason === "already-imported").length,
+      duplicateInFile: preview.filter((r) => r.skipReason === "duplicate-in-file").length,
+      noCategory: preview.filter((r) => r.skipReason === "no-category").length,
+    }),
+    [preview]
+  );
 
   async function confirm() {
     const n = await commitImport(importable, accountId, currency);
@@ -200,14 +219,30 @@ export default function ImportStatement() {
 
       {step === "preview" && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between rounded-xl bg-surface-2 px-3 py-2 text-sm">
-            <span className="text-content">
-              <b>{importable.length}</b> to import
-            </span>
-            {dupes > 0 && (
-              <span className="flex items-center gap-1 text-faint">
-                <AlertTriangle size={14} /> {dupes} duplicate{dupes === 1 ? "" : "s"} skipped
+          <div className="rounded-xl bg-surface-2 px-3 py-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-content">
+                <b>{importable.length}</b> to import
               </span>
+              {dupes > 0 && (
+                <span className="flex items-center gap-1 text-faint">
+                  <AlertTriangle size={14} /> {dupes} skipped
+                </span>
+              )}
+            </div>
+            {/* breakdown of why rows are skipped */}
+            {dupes > 0 && (
+              <ul className="mt-1 space-y-0.5 text-xs text-faint">
+                {skipCounts.alreadyImported > 0 && (
+                  <li>• {skipCounts.alreadyImported} already imported before</li>
+                )}
+                {skipCounts.duplicateInFile > 0 && (
+                  <li>• {skipCounts.duplicateInFile} repeated within this file</li>
+                )}
+                {skipCounts.noCategory > 0 && (
+                  <li>• {skipCounts.noCategory} couldn't match a category</li>
+                )}
+              </ul>
             )}
           </div>
 
@@ -226,23 +261,29 @@ export default function ImportStatement() {
                     <p className="truncate text-sm font-medium text-content">{r.description}</p>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-faint">{dayjs(r.date).format("MMM D")}</span>
-                      {/* editable category */}
-                      <select
-                        value={r.categoryId}
-                        onChange={(e) => {
-                          const v = e.target.value;
-                          setPreview((prev) => prev.map((x, xi) => (xi === i ? { ...x, categoryId: v } : x)));
-                        }}
-                        className="rounded-md bg-surface-2 px-1 py-0.5 text-xs text-muted outline-none"
-                      >
-                        {categories
-                          .filter((c) => c.type === r.type)
-                          .map((c) => (
-                            <option key={c.id} value={c.id}>
-                              {c.name}
-                            </option>
-                          ))}
-                      </select>
+                      {r.skipReason ? (
+                        <span className="rounded-md bg-red-500/15 px-1.5 py-0.5 text-[11px] font-medium text-red-500">
+                          {skipLabel(r.skipReason)}
+                        </span>
+                      ) : (
+                        /* editable category */
+                        <select
+                          value={r.categoryId}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            setPreview((prev) => prev.map((x, xi) => (xi === i ? { ...x, categoryId: v } : x)));
+                          }}
+                          className="rounded-md bg-surface-2 px-1 py-0.5 text-xs text-muted outline-none"
+                        >
+                          {categories
+                            .filter((c) => c.type === r.type)
+                            .map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.name}
+                              </option>
+                            ))}
+                        </select>
+                      )}
                     </div>
                   </div>
                   <span className={`shrink-0 text-sm font-semibold ${r.type === "income" ? "text-mint" : "text-content"}`}>
