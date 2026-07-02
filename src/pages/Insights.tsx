@@ -98,7 +98,7 @@ export default function Activity() {
           only the chart/total content changes — the filters & list below never
           shift when the month changes. */}
       <div ref={swipeRef} className="touch-pan-y">
-        <header className="flex h-[104px] flex-col items-center justify-center gap-1">
+        <header className="flex h-[92px] flex-col items-center justify-center gap-1.5">
           <MonthPicker month={activeMonth} onChange={setMonth} />
           <p className="text-[40px] font-bold leading-none tracking-tight text-content">{totalStr}</p>
           {/* reserve the comparison row so the header doesn't jump when it's absent */}
