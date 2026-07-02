@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Download, Upload, RefreshCw, Repeat, Plus, Trash2, Eye, EyeOff, Sun, Moon, Monitor, Sparkles, Shapes, Wallet, ChevronRight, Zap, Landmark, Smartphone } from "lucide-react";
+import { Download, Upload, RefreshCw, Repeat, Plus, Trash2, Eye, EyeOff, Sun, Moon, Monitor, Sparkles, Shapes, Wallet, ChevronRight, Zap, Landmark, Smartphone, Layers } from "lucide-react";
 import { useSettings } from "@/store/useSettings";
 import { useAccounts, useCategories, useRecurring } from "@/hooks/useData";
 import { CURRENCIES } from "@/lib/money";
