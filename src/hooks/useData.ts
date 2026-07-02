@@ -32,3 +32,12 @@ export function useRecurring() {
 export function useGroups() {
   return useLiveQuery(() => db.groups.toArray(), [], []);
 }
+
+/** Epoch-ms of the start of the most recent month that has any transaction. */
+export function useLatestMonthWithData(): number | undefined {
+  return useLiveQuery(async () => {
+    const last = await db.transactions.orderBy("date").last();
+    const d = last ? new Date(last.date) : new Date();
+    return new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+  }, []);
+}

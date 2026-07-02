@@ -1,32 +1,35 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Target, Wallet } from "lucide-react";
-import { PeriodSwitcher } from "@/components/PeriodSwitcher";
+import dayjs from "dayjs";
 import { SpendDonut } from "@/components/SpendDonut";
 import { TransactionRow } from "@/components/TransactionRow";
 import { CategoryIcon } from "@/components/CategoryIcon";
-import { useCategories, useTransactionsInRange } from "@/hooks/useData";
+import { MonthPicker } from "@/components/MonthPicker";
+import { useCategories, useTransactionsInRange, useLatestMonthWithData } from "@/hooks/useData";
 import { useSettings } from "@/store/useSettings";
 import { spendByCategory, totals, percentChange } from "@/lib/calc";
 import { formatMoney, maskMoney } from "@/lib/money";
-import { rangeBounds, prevRangeBounds, prevPeriodLabel, type RangeKey } from "@/lib/dates";
 
-export default function Dashboard() {
+export default function Summary() {
   const navigate = useNavigate();
   const settings = useSettings((s) => s.settings);
   const toggleHide = useSettings((s) => s.toggleHideBalances);
   const categories = useCategories();
+  const latestMonth = useLatestMonthWithData();
 
-  const [range, setRange] = useState<RangeKey>("month");
-  const now = useMemo(() => Date.now(), []);
-  const monthStart = settings?.monthStartDay ?? 1;
-  const { start, end } = useMemo(
-    () => rangeBounds(range, now, monthStart),
-    [range, now, monthStart]
-  );
-  const prev = useMemo(() => prevRangeBounds(range, now, monthStart), [range, now, monthStart]);
-  const txs = useTransactionsInRange(start, end);
-  const prevTxs = useTransactionsInRange(prev.start, prev.end);
+  const [month, setMonth] = useState<number | null>(null);
+  useEffect(() => {
+    if (month === null && latestMonth) setMonth(latestMonth);
+  }, [latestMonth, month]);
+  const activeMonth = month ?? latestMonth ?? dayjs().startOf("month").valueOf();
+
+  const start = dayjs(activeMonth).startOf("month");
+  const end = dayjs(activeMonth).endOf("month");
+  const prevStart = start.subtract(1, "month");
+  const prevEnd = start.subtract(1, "millisecond");
+  const txs = useTransactionsInRange(start.valueOf(), end.valueOf());
+  const prevTxs = useTransactionsInRange(prevStart.valueOf(), prevEnd.valueOf());
 
   const hide = settings?.hideBalances ?? false;
   const currency = settings?.currency ?? "USD";
@@ -37,32 +40,21 @@ export default function Dashboard() {
   const slices = spendByCategory(txs);
   const recent = [...txs].sort((a, b) => b.date - a.date).slice(0, 8);
 
-  const net = income - expense;
   const fmt = (n: number) => (hide ? maskMoney(formatMoney(n, currency)) : formatMoney(n, currency));
-  const periodWord =
-    range === "week" ? "last 7 days" : range === "quarter" ? "last 90 days" : range === "year" ? "last year" : "last 30 days";
 
   return (
     <div className="safe-top space-y-4 px-4 pt-4">
-      {/* header row: net for the selected window + hide toggle */}
+      {/* header row: month picker + hide toggle */}
       <header className="flex items-center justify-between">
-        <div>
-          <p className="text-xs text-faint">Net · {periodWord}</p>
-          <p className={`text-lg font-semibold ${net >= 0 ? "text-mint" : "text-content"}`}>
-            {net >= 0 ? "+" : "−"}
-            {fmt(Math.abs(net))}
-          </p>
-        </div>
+        <MonthPicker month={activeMonth} onChange={setMonth} />
         <button
           onClick={toggleHide}
           aria-label="Toggle balances"
-          className="rounded-full bg-surface p-2.5 text-brand-600 shadow-card"
+          className="rounded-full bg-surface p-2.5 text-brand-500 shadow-card"
         >
           {hide ? <EyeOff size={20} /> : <Eye size={20} />}
         </button>
       </header>
-
-      <PeriodSwitcher value={range} onChange={setRange} />
 
       {/* donut leads with 'Expenses this <period>' + comparison, like Quanto */}
       <div className="card p-4">
@@ -71,9 +63,9 @@ export default function Dashboard() {
           categories={categories}
           currency={currency}
           hideBalances={hide}
-          centerLabel={`Spent · ${periodWord}`}
+          centerLabel={`Spent · ${start.format("MMM")}`}
           pct={expensePct}
-          comparisonLabel={prevPeriodLabel(range, now, monthStart)}
+          comparisonLabel={prevStart.format("MMM")}
         />
 
         {/* legend: icon · name · count · amount · % */}

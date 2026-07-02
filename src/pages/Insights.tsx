@@ -1,180 +1,113 @@
-import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceLine,
-  Cell,
-} from "recharts";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { TransactionRow } from "@/components/TransactionRow";
-import { FilterChips, type Filters } from "@/components/FilterChips";
+import { ActivityFilters, type Filters, type SortKey } from "@/components/FilterChips";
+import { ActivityChart } from "@/components/ActivityChart";
 import { ComparisonPill } from "@/components/ComparisonPill";
-import { useAccounts, useCategories, useTransactionsInRange } from "@/hooks/useData";
-import { useSettings } from "@/store/useSettings";
+import { MonthPicker } from "@/components/MonthPicker";
 import {
-  rangeBounds,
-  prevRangeBounds,
-  prevPeriodLabel,
-  type RangeKey,
-  fmtDayHeader,
-} from "@/lib/dates";
+  useAccounts,
+  useCategories,
+  useTransactionsInRange,
+  useLatestMonthWithData,
+} from "@/hooks/useData";
+import { useSettings } from "@/store/useSettings";
+import { fmtDayHeader } from "@/lib/dates";
 import { formatMoney, maskMoney } from "@/lib/money";
 import { percentChange } from "@/lib/calc";
-import { isDark } from "@/lib/theme";
 import type { Transaction } from "@/db/types";
 
-export default function Insights() {
+/** Activity: main screen — monthly bar chart + filters + transaction list. */
+export default function Activity() {
+  const navigate = useNavigate();
   const settings = useSettings((s) => s.settings);
   const categories = useCategories();
   const accounts = useAccounts();
+  const latestMonth = useLatestMonthWithData();
+
+  const [month, setMonth] = useState<number | null>(null);
+  useEffect(() => {
+    if (month === null && latestMonth) setMonth(latestMonth);
+  }, [latestMonth, month]);
+  const activeMonth = month ?? latestMonth ?? dayjs().startOf("month").valueOf();
 
   const [filters, setFilters] = useState<Filters>({
     txType: "expense",
     range: "month",
     accountId: "all",
     categoryId: "all",
+    sort: "date-desc",
   });
-  const [merchantQ, setMerchantQ] = useState("");
+  const [q, setQ] = useState("");
 
-  const dark = isDark(settings?.theme ?? "system");
-  // White bars on dark (Quanto look), Shark bars on light.
-  const chart = dark
-    ? { bar: "#f5f5f7", cursor: "rgba(255,255,255,0.06)", tip: "#1c1c1e", tipBorder: "#38383a", label: "#98989d", grid: "#48484a" }
-    : { bar: "#1d1d1f", cursor: "rgba(0,0,0,0.04)", tip: "#ffffff", tipBorder: "#e2e2e7", label: "#98989d", grid: "#c7c7cc" };
+  const start = dayjs(activeMonth).startOf("month");
+  const end = dayjs(activeMonth).endOf("month");
+  const prevStart = start.subtract(1, "month");
+  const prevEnd = start.subtract(1, "millisecond");
 
-  const now = useMemo(() => Date.now(), []);
-  const monthStart = settings?.monthStartDay ?? 1;
-  const { start, end } = useMemo(
-    () => rangeBounds(filters.range, now, monthStart),
-    [filters.range, now, monthStart]
-  );
-  const prev = useMemo(
-    () => prevRangeBounds(filters.range, now, monthStart),
-    [filters.range, now, monthStart]
-  );
-
-  const txs = useTransactionsInRange(start, end);
-  const prevTxs = useTransactionsInRange(prev.start, prev.end);
+  const txs = useTransactionsInRange(start.valueOf(), end.valueOf());
+  const prevTxs = useTransactionsInRange(prevStart.valueOf(), prevEnd.valueOf());
 
   const hide = settings?.hideBalances ?? false;
   const currency = settings?.currency ?? "USD";
 
-  const mq = merchantQ.trim().toLowerCase();
+  const mq = q.trim().toLowerCase();
+  const catName = useMemo(
+    () => new Map(categories.map((c) => [c.id, c.name.toLowerCase()])),
+    [categories]
+  );
   const matches = (t: Transaction) =>
     (filters.txType === "all" || t.type === filters.txType) &&
     (filters.accountId === "all" || t.accountId === filters.accountId) &&
     (filters.categoryId === "all" || t.categoryId === filters.categoryId) &&
-    (!mq || (t.note ?? "").toLowerCase().includes(mq)) &&
+    (!mq ||
+      (t.note ?? "").toLowerCase().includes(mq) ||
+      (catName.get(t.categoryId) ?? "").includes(mq) ||
+      String(t.amount).includes(mq)) &&
     !t.transferId;
 
-  const filtered = useMemo(() => txs.filter(matches), [txs, filters, mq]);
-  const prevFiltered = useMemo(() => prevTxs.filter(matches), [prevTxs, filters, mq]);
+  const filtered = useMemo(() => txs.filter(matches), [txs, filters, mq, catName]);
+  const prevFiltered = useMemo(() => prevTxs.filter(matches), [prevTxs, filters, mq, catName]);
 
   const total = filtered.reduce((s, t) => s + t.amount, 0);
   const prevTotal = prevFiltered.reduce((s, t) => s + t.amount, 0);
   const pct = percentChange(total, prevTotal);
 
-  const bars = useMemo(() => bucketTx(filtered, filters.range), [filtered, filters.range]);
-  const grouped = useMemo(() => groupByDay(filtered), [filtered]);
-  const avg = bars.length ? total / bars.length : 0;
+  const bars = useMemo(() => dailyBuckets(filtered, start), [filtered, start]);
+  const grouped = useMemo(() => groupByDay(filtered, filters.sort), [filtered, filters.sort]);
 
   const totalStr = hide ? maskMoney(formatMoney(total, currency)) : formatMoney(total, currency);
   const label = filters.txType === "income" ? "Income" : "Expenses";
 
   return (
-    <div className="safe-top space-y-4 px-4 pt-4">
-      {/* header: leads with the period figure + comparison, like Quanto */}
-      <header className="text-center">
-        <p className="text-sm text-faint">{label} · {periodWord(filters.range)}</p>
-        <p className="text-4xl font-bold tracking-tight text-content">{totalStr}</p>
-        <div className="mt-1">
-          <ComparisonPill pct={pct} label={prevPeriodLabel(filters.range, now, monthStart)} />
-        </div>
+    <div className="safe-top space-y-5 px-4 pt-3">
+      {/* header: month picker + big total + comparison */}
+      <header className="flex flex-col items-center gap-1.5">
+        <MonthPicker month={activeMonth} onChange={setMonth} />
+        <p className="text-[40px] font-bold leading-none tracking-tight text-content">{totalStr}</p>
+        <ComparisonPill pct={pct} label={prevStart.format("MMM")} />
       </header>
 
-      {/* bar chart */}
-      <div className="card p-4">
-        {bars.every((b) => b.value === 0) ? (
-          <p className="py-12 text-center text-sm text-faint">No data for this period</p>
-        ) : (
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={bars} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
-              <XAxis
-                dataKey="label"
-                tickLine={false}
-                axisLine={false}
-                fontSize={11}
-                interval="preserveStartEnd"
-                stroke={chart.label}
-              />
-              <YAxis
-                orientation="right"
-                tickLine={false}
-                axisLine={false}
-                width={38}
-                fontSize={11}
-                stroke={chart.label}
-                tickFormatter={(v) => compact(v)}
-              />
-              {avg > 0 && (
-                <ReferenceLine
-                  y={avg}
-                  stroke={chart.grid}
-                  strokeDasharray="4 4"
-                  ifOverflow="extendDomain"
-                />
-              )}
-              <Tooltip
-                cursor={{ fill: chart.cursor }}
-                formatter={(v: number) => formatMoney(v, currency)}
-                labelStyle={{ color: chart.label }}
-                contentStyle={{
-                  borderRadius: 12,
-                  border: `1px solid ${chart.tipBorder}`,
-                  background: chart.tip,
-                }}
-              />
-              <Bar dataKey="value" radius={[3, 3, 0, 0]} maxBarSize={18} isAnimationActive={false}>
-                {bars.map((_, i) => (
-                  <Cell key={i} fill={chart.bar} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        )}
-      </div>
+      {/* chart (floats on background, no card) */}
+      {bars.some((b) => b.value > 0) ? (
+        <ActivityChart bars={bars} currency={currency} />
+      ) : (
+        <p className="py-16 text-center text-sm text-faint">No {label.toLowerCase()} this month</p>
+      )}
 
-      {/* filter chips */}
-      <FilterChips
+      {/* filters + search */}
+      <ActivityFilters
         filters={filters}
         onChange={setFilters}
         accounts={accounts}
         categories={categories}
+        search={q}
+        onSearch={setQ}
       />
 
-      {/* merchant search */}
-      <div className="flex items-center gap-2 rounded-xl bg-surface px-3 py-2 shadow-card">
-        <Search size={16} className="text-faint" />
-        <input
-          value={merchantQ}
-          onChange={(e) => setMerchantQ(e.target.value)}
-          placeholder="Filter by merchant (e.g. Advanzia, Rewe)…"
-          className="w-full bg-transparent text-sm text-content outline-none placeholder:text-faint"
-        />
-        {merchantQ && (
-          <button onClick={() => setMerchantQ("")} className="text-xs text-brand-600">
-            Clear
-          </button>
-        )}
-      </div>
-
       {/* daily transaction lists */}
-      <section className="space-y-4">
+      <section className="space-y-5">
         {grouped.map(([day, items]) => {
           const dayTotal = items.reduce((s, t) => s + (t.type === "expense" ? t.amount : -t.amount), 0);
           const dt = hide
@@ -182,21 +115,24 @@ export default function Insights() {
             : formatMoney(Math.abs(dayTotal), currency);
           return (
             <div key={day}>
-              <div className="mb-1 flex items-center justify-between px-1">
-                <h3 className="text-sm font-semibold text-muted">{fmtDayHeader(Number(day))}</h3>
-                <span className="text-xs text-faint">
+              <div className="mb-2 flex items-center justify-between px-1">
+                <h3 className="text-[15px] font-medium text-faint">{fmtDayHeader(Number(day))}</h3>
+                <span className="text-[15px] text-faint">
                   {dayTotal < 0 ? "−" : "+"}
                   {dt}
                 </span>
               </div>
-              <div className="card divide-y divide-line p-1">
-                {items.map((tx) => (
-                  <TransactionRow
-                    key={tx.id}
-                    tx={tx}
-                    category={categories.find((c) => c.id === tx.categoryId)}
-                    hideBalances={hide}
-                  />
+              <div className="overflow-hidden rounded-2xl bg-surface">
+                {items.map((tx, i) => (
+                  <div key={tx.id}>
+                    {i > 0 && <div className="ml-[72px] h-px bg-line" />}
+                    <TransactionRow
+                      tx={tx}
+                      category={categories.find((c) => c.id === tx.categoryId)}
+                      hideBalances={hide}
+                      onClick={() => navigate(`/edit/${tx.id}`)}
+                    />
+                  </div>
                 ))}
               </div>
             </div>
@@ -210,47 +146,15 @@ export default function Insights() {
   );
 }
 
-function periodWord(range: RangeKey): string {
-  return range === "week"
-    ? "last 7 days"
-    : range === "quarter"
-      ? "last 90 days"
-      : range === "year"
-        ? "last year"
-        : "last 30 days";
+/** One bar per day of the month. */
+function dailyBuckets(txs: Transaction[], monthStart: dayjs.Dayjs) {
+  const days = monthStart.daysInMonth();
+  const arr = Array.from({ length: days }, (_, i) => ({ label: String(i + 1), value: 0 }));
+  for (const t of txs) arr[dayjs(t.date).date() - 1].value += t.amount;
+  return arr;
 }
 
-/** Compact axis labels: 30000 -> 30k, 1200000 -> 1.2M */
-function compact(v: number): string {
-  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
-  if (v >= 1_000) return `${Math.round(v / 1_000)}k`;
-  return String(v);
-}
-
-function bucketTx(txs: Transaction[], range: RangeKey) {
-  const buckets = new Map<string, { label: string; value: number; order: number }>();
-  for (const t of txs) {
-    const d = dayjs(t.date);
-    let key: string;
-    let label: string;
-    let order: number;
-    if (range === "week" || range === "month") {
-      key = d.format("YYYY-MM-DD");
-      label = d.format("D");
-      order = d.valueOf();
-    } else {
-      key = d.format("YYYY-MM");
-      label = d.format("MMM");
-      order = d.startOf("month").valueOf();
-    }
-    const cur = buckets.get(key);
-    if (cur) cur.value += t.amount;
-    else buckets.set(key, { label, value: t.amount, order });
-  }
-  return [...buckets.values()].sort((a, b) => a.order - b.order);
-}
-
-function groupByDay(txs: Transaction[]): [string, Transaction[]][] {
+function groupByDay(txs: Transaction[], sort: SortKey): [string, Transaction[]][] {
   const map = new Map<string, Transaction[]>();
   for (const t of txs) {
     const key = String(dayjs(t.date).startOf("day").valueOf());
@@ -258,7 +162,23 @@ function groupByDay(txs: Transaction[]): [string, Transaction[]][] {
     arr.push(t);
     map.set(key, arr);
   }
-  return [...map.entries()]
-    .sort((a, b) => Number(b[0]) - Number(a[0]))
-    .map(([k, v]) => [k, v.sort((x, y) => y.date - x.date)]);
+  // within-day ordering
+  const rowCmp =
+    sort === "amount-asc"
+      ? (x: Transaction, y: Transaction) => x.amount - y.amount
+      : sort === "amount-desc"
+        ? (x: Transaction, y: Transaction) => y.amount - x.amount
+        : sort === "date-asc"
+          ? (x: Transaction, y: Transaction) => x.date - y.date
+          : (x: Transaction, y: Transaction) => y.date - x.date;
+  // day ordering: amount sorts rank days by their total; date sorts by date
+  const dayTotal = (rows: Transaction[]) => rows.reduce((s, t) => s + t.amount, 0);
+  const entries: [string, Transaction[]][] = [...map.entries()].map(([k, v]) => [k, v.sort(rowCmp)]);
+  entries.sort((a, b) => {
+    if (sort === "amount-desc") return dayTotal(b[1]) - dayTotal(a[1]);
+    if (sort === "amount-asc") return dayTotal(a[1]) - dayTotal(b[1]);
+    if (sort === "date-asc") return Number(a[0]) - Number(b[0]);
+    return Number(b[0]) - Number(a[0]);
+  });
+  return entries;
 }

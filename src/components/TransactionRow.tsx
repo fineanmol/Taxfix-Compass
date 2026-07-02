@@ -16,26 +16,28 @@ export function TransactionRow({
   const money = formatMoney(tx.amount, tx.currency);
   const display = hideBalances ? maskMoney(money) : money;
   const color = category?.color ?? "#64748b";
+  // hide the note subtitle when it just repeats the category name
+  const showNote = tx.note && tx.note.toLowerCase() !== (category?.name ?? "").toLowerCase();
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left active:bg-surface-2 transition"
+      className="flex w-full items-center gap-3 px-4 py-3 text-left transition active:bg-surface-2"
     >
       <span
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
         style={{ backgroundColor: color + "22", color }}
       >
-        <CategoryIcon name={category?.icon ?? "Circle"} size={20} />
+        <CategoryIcon name={category?.icon ?? "Circle"} size={22} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-medium text-content">
+        <span className="block truncate text-[17px] font-medium text-content">
           {category?.name ?? "Uncategorized"}
         </span>
-        {tx.note && <span className="block truncate text-xs text-faint">{tx.note}</span>}
+        {showNote && <span className="block truncate text-[13px] text-faint">{tx.note}</span>}
       </span>
       <span
-        className={`shrink-0 font-semibold ${
-          tx.type === "income" ? "text-green-600" : "text-content"
+        className={`shrink-0 text-[17px] font-semibold ${
+          tx.type === "income" ? "text-mint" : "text-content"
         }`}
       >
         {tx.type === "income" ? "+" : "−"}

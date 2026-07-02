@@ -10,9 +10,8 @@ export function ComparisonPill({
   pct: number | null;
   label: string;
 }) {
-  if (pct === null || pct === 0) {
-    return <span className="text-xs text-faint">No change from {label}</span>;
-  }
+  // nothing meaningful to compare — render nothing rather than "No change from…"
+  if (pct === null || pct === 0) return null;
   const up = pct > 0;
   const good = !up; // spending less than last period is good
   const color = good ? "text-mint" : "text-red-500";
