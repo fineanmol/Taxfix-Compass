@@ -5,15 +5,23 @@ import { importHash, type ParsedRow } from "./statement";
 
 /** Keyword → category-name guesses for auto-categorizing statement rows. */
 const KEYWORD_MAP: Array<{ re: RegExp; cat: string }> = [
-  { re: /uber|lyft|taxi|transport|rail|train|tfl|bus|metro|fuel|shell|bp|esso|petrol|gas station/i, cat: "Transport" },
-  { re: /tesco|sainsbury|lidl|aldi|asda|waitrose|grocery|supermarket|market/i, cat: "Groceries" },
-  { re: /restaurant|cafe|coffee|starbucks|costa|mcdonald|kfc|pizza|deliveroo|just eat|uber eats|food|dining|pub|bar /i, cat: "Food & Drink" },
-  { re: /amazon|ebay|shop|store|asos|zara|h&m|clothing|retail/i, cat: "Shopping" },
-  { re: /netflix|spotify|disney|cinema|theatre|game|steam|playstation|xbox|entertain/i, cat: "Entertainment" },
-  { re: /electric|gas bill|water|council|rent|mortgage|insurance|phone|vodafone|ee |o2 |broadband|internet|utility|bill/i, cat: "Bills" },
-  { re: /pharmacy|boots|doctor|dental|hospital|clinic|gym|fitness|health/i, cat: "Health" },
-  { re: /hotel|airbnb|flight|airline|ryanair|easyjet|booking\.com|travel/i, cat: "Travel" },
-  { re: /salary|payroll|wages|payment from|hmrc/i, cat: "Salary" },
+  { re: /uber|lyft|taxi|rail|train|tfl|bus\b|metro|deutsche bahn|db vertrieb|\bdb\b|flixbus|bvg|bahn/i, cat: "Transport" },
+  { re: /shell|aral|esso|\bbp\b|petrol|gas station|tankstelle|fuel/i, cat: "Fuel" },
+  { re: /tesco|sainsbury|lidl|aldi|asda|waitrose|rewe|edeka|kaufland|penny|netto|dm |rossmann|flink|gorillas|getir|grocery|supermarket|market/i, cat: "Groceries" },
+  { re: /restaurant|cafe|caf[eé]|coffee|starbucks|costa|mcdonald|kfc|pizza|deliveroo|just eat|uber eats|lieferando|dhaba|bakeshop|bakery|dining|\bpub\b|\bbar\b|bar /i, cat: "Food & Drink" },
+  { re: /amazon|ebay|shop|store|asos|zara|h&m|primark|woolworth|action|ikea|clothing|retail/i, cat: "Shopping" },
+  { re: /netflix|spotify|disney|cinema|theatre|game|steam|playstation|xbox|youtube|entertain/i, cat: "Entertainment" },
+  { re: /netflix|spotify|disney\+|prime|icloud|subscription|abo\b/i, cat: "Subscriptions" },
+  { re: /electric|gas bill|water|council|mortgage|insurance|hallesche|feather|vodafone|telekom|o2|broadband|internet|utility|strom|miete/i, cat: "Bills" },
+  { re: /\brent\b|habyt|landlord|wohnung|immobilien/i, cat: "Rent" },
+  { re: /pharmacy|apotheke|boots|doctor|dental|hospital|clinic|health/i, cat: "Health" },
+  { re: /gym|fitness|mcfit|urban sports|clever fit/i, cat: "Fitness" },
+  { re: /hotel|airbnb|flight|airline|ryanair|easyjet|lufthansa|booking\.com|travel/i, cat: "Travel" },
+  { re: /exchanged to|robo portfolio|invest|trading|etf|crypto|advanzia/i, cat: "Investments" },
+  // income
+  { re: /salary|payroll|wages|gehalt|lohn|link11|payment from|from .* gmbh/i, cat: "Salary" },
+  { re: /refund|erstattung|reimburse|cashback|compensation/i, cat: "Refund" },
+  { re: /interest|reward|zinsen/i, cat: "Interest" },
 ];
 
 function guessCategory(desc: string, categories: Category[], type: "expense" | "income"): string {

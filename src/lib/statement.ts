@@ -75,7 +75,34 @@ export function parseCsvGrid(text: string): { header: string[]; rows: string[][]
   const lines = text.split(/\r?\n/).filter((l) => l.trim().length);
   if (!lines.length) return { header: [], rows: [] };
   const grid = lines.map(parseCsvLine);
-  return { header: grid[0], rows: grid.slice(1) };
+  return gridFromRows(grid);
+}
+
+/**
+ * Given a raw 2D grid (from CSV or Excel), find the real transaction-table
+ * header row — statements often have a summary/preamble block first (account
+ * details, institution info) before the actual "Date | Description | …" header.
+ */
+export function gridFromRows(grid: string[][]): { header: string[]; rows: string[][] } {
+  const looksLikeHeader = (r: string[]) => {
+    const cells = r.map((c) => c.toLowerCase());
+    const hasDate = cells.some((c) => /^date\b|^date$/.test(c.trim()));
+    const hasMoney = cells.some((c) =>
+      /(amount|money in|money out|money in\/out|paid in|paid out|debit|credit|balance|value)/.test(c)
+    );
+    return hasDate && hasMoney;
+  };
+  let headerIdx = grid.findIndex(looksLikeHeader);
+  if (headerIdx < 0) {
+    // fall back to first row with 2+ non-empty cells
+    headerIdx = grid.findIndex((r) => r.filter((c) => c.trim()).length >= 2);
+    if (headerIdx < 0) headerIdx = 0;
+  }
+  const header = (grid[headerIdx] ?? []).map((c) => c.trim());
+  const rows = grid
+    .slice(headerIdx + 1)
+    .filter((r) => r.some((c) => c.trim().length));
+  return { header, rows };
 }
 
 function parseCsvLine(line: string): string[] {
@@ -188,22 +215,13 @@ export function parseXlsxGrid(
   if (!sheet) return { header: [], rows: [] };
 
   // rows as arrays; blank cells become ""; dates formatted as YYYY-MM-DD
-  const grid = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
+  const raw = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
     header: 1,
     raw: false,
     dateNF: "yyyy-mm-dd",
     defval: "",
   });
-
-  // find the header row: first row with 2+ non-empty cells (skips title/blank rows)
-  let headerIdx = grid.findIndex((r) => r.filter((c) => String(c).trim()).length >= 2);
-  if (headerIdx < 0) headerIdx = 0;
-
-  const header = (grid[headerIdx] ?? []).map((c) => String(c).trim());
-  const rows = grid
-    .slice(headerIdx + 1)
-    .map((r) => r.map((c) => String(c ?? "").trim()))
-    .filter((r) => r.some((c) => c.length));
-
-  return { header, rows };
+  const grid = raw.map((r) => r.map((c) => String(c ?? "").trim()));
+  // reuse the shared transaction-header detection (skips summary preamble)
+  return gridFromRows(grid);
 }

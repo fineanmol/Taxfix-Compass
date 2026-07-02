@@ -463,14 +463,20 @@ function ColSelect({
 }
 
 function guessMapping(header: string[]): CsvMapping {
-  const find = (res: RegExp) => header.findIndex((h) => res.test(h));
+  const find = (res: RegExp) => header.findIndex((h) => res.test(h.trim()));
   const dateCol = Math.max(0, find(/date|posted/i));
-  const descCol = Math.max(0, find(/desc|payee|name|detail|memo|reference|narrative/i));
-  const amountCol = Math.max(0, find(/amount|value/i));
-  const debit = find(/debit|withdrawal|paid out|money out/i);
-  const credit = find(/credit|deposit|paid in|money in/i);
-  const m: CsvMapping = { dateCol, descCol, amountCol };
-  if (debit >= 0 && credit >= 0) {
+  const descCol = Math.max(0, find(/desc|payee|name|detail|memo|narrative|merchant|reference/i));
+
+  // A single signed "Money in/out" / "Amount" column is the transaction amount.
+  // IMPORTANT: never pick "Balance" as the amount — it's the running total.
+  const moneyInOut = find(/money\s*in\s*\/?\s*out|amount|value/i);
+
+  // Separate debit + credit columns (only when they're genuinely distinct)
+  const debit = find(/debit|withdrawal|paid out|(?<!\/)money out/i);
+  const credit = find(/credit|paid in|(?<!\/)money in(?!\/)/i);
+
+  const m: CsvMapping = { dateCol, descCol, amountCol: moneyInOut >= 0 ? moneyInOut : 0 };
+  if (debit >= 0 && credit >= 0 && debit !== credit) {
     m.debitCol = debit;
     m.creditCol = credit;
   }

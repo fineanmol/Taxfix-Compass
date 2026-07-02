@@ -16,8 +16,8 @@ const updateSW = registerSW({
   },
 });
 
-// Dev/testing helpers accessible from the console.
-if (typeof window !== "undefined") {
+// Dev/testing helpers accessible from the console — dev builds only.
+if (import.meta.env.DEV && typeof window !== "undefined") {
   (window as unknown as Record<string, unknown>).__loadSample = loadSampleData;
   (window as unknown as Record<string, unknown>).__applyTheme = applyTheme;
 }

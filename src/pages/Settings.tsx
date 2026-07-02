@@ -151,16 +151,19 @@ export default function SettingsPage() {
         </button>
         {importMsg && <p className="text-xs text-mint">{importMsg}</p>}
         <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={onImport} className="hidden" />
-        <button
-          onClick={async () => {
-            const n = await loadSampleData();
-            setImportMsg(`Loaded ${n} sample transactions`);
-          }}
-          className="flex w-full items-center gap-3 py-2.5 text-left"
-        >
-          <Sparkles size={18} className="text-brand-600" />
-          <span className="text-sm text-content">Load sample data</span>
-        </button>
+        {/* dev-only: never shipped in production builds */}
+        {import.meta.env.DEV && (
+          <button
+            onClick={async () => {
+              const n = await loadSampleData();
+              setImportMsg(`Loaded ${n} sample transactions`);
+            }}
+            className="flex w-full items-center gap-3 py-2.5 text-left"
+          >
+            <Sparkles size={18} className="text-brand-600" />
+            <span className="text-sm text-content">Load sample data (dev)</span>
+          </button>
+        )}
       </Section>
 
       {/* sync */}

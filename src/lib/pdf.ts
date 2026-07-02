@@ -119,12 +119,12 @@ export function parsePdfLines(
     const moneyTokens = line.match(MONEY);
     if (!moneyTokens || moneyTokens.length === 0) continue;
 
-    // Heuristic: the LAST money token on a line is usually the running balance
-    // when there are 2+; the transaction amount is the one before it. With a
-    // single money token, that's the amount.
-    let amountToken: string;
-    if (moneyTokens.length >= 2) amountToken = moneyTokens[moneyTokens.length - 2];
-    else amountToken = moneyTokens[0];
+    // The transaction amount is the FIRST money token on the row: statement
+    // layouts list it right after the description/category, followed by the
+    // running balance and any fee/tax columns (often €0.00). The first token
+    // that isn't zero is the amount; a leading balance would be rare and the
+    // amount column always comes before balance in these statements.
+    let amountToken = moneyTokens.find((t) => parseAmount(t).value !== 0) ?? moneyTokens[0];
 
     const { value, explicitSign } = parseAmount(amountToken);
     if (!Number.isFinite(value) || value === 0) continue;
@@ -136,10 +136,16 @@ export function parsePdfLines(
     desc = desc
       .replace(/[£$€]/g, " ") // stray currency symbols
       .replace(/[´`^]/g, " ") // encoding artifacts from some PDFs
-      .replace(/\b\d{1,3}(?:,\d{3})*(?:\.\d{2})?\b/g, " ") // leftover bare numbers (balances)
+      .replace(/\d{1,3}(?:,\d{3})+(?:\.\d{2})?/g, " ") // leftover thousands-grouped numbers (balances)
+      .replace(/\b\d+\.\d{2}\b/g, " ") // leftover decimal amounts
       .replace(/\s+(DR|CR)\b/gi, " ")
       .replace(/\s+/g, " ")
       .trim() || "Transaction";
+    // strip a trailing statement-category word (e.g. "Rewe Merchant" → "Rewe")
+    const catMatch = desc.match(
+      /\s+(Merchant|Others|Deposit|Refund|Exchange|Transfer|Reward or interest|Card payment|Top-Up|Fee|ATM)$/i
+    );
+    if (catMatch) desc = desc.slice(0, -catMatch[0].length).trim() || catMatch[1];
 
     // determine expense/income. Explicit signals (−, DR, CR, parens) win;
     // otherwise use income keywords; otherwise assume expense (most lines are).

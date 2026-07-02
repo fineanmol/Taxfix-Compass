@@ -1,20 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, X } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, X, Search } from "lucide-react";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { IconButton } from "@/components/ui";
 import { useCategories } from "@/hooks/useData";
 import { addCategory, updateCategory, deleteCategory } from "@/db/mutations";
+import { searchEmoji } from "@/lib/emoji";
 import type { Category, TxType } from "@/db/types";
 
-// emoji available in the picker
-const ICON_CHOICES = [
-  "🍔", "🍕", "🍜", "☕", "🍺", "🛒", "🛍️", "👕", "👟", "💄",
-  "🚗", "⛽", "🚌", "🚕", "✈️", "🏠", "💡", "🧾", "📱", "💻",
-  "🎬", "🎮", "🎵", "📚", "🎓", "🏋️", "❤️‍🩹", "💊", "🐾", "🍼",
-  "🎁", "💇", "🏛️", "🔁", "💰", "💼", "🏢", "📈", "🏦", "↩️",
-  "💳", "💵", "🎉", "🏖️", "⚽", "🚿", "🔧", "🌱", "📦", "⭐",
-];
 
 const COLOR_CHOICES = [
   "#FF3B30", "#FF9500", "#FFCC00", "#34C759", "#00C7BE",
@@ -122,6 +115,8 @@ function CategorySheet({
   const [name, setName] = useState(category?.name ?? "");
   const [icon, setIcon] = useState(category?.icon ?? "📦");
   const [color, setColor] = useState(category?.color ?? COLOR_CHOICES[6]);
+  const [emojiQuery, setEmojiQuery] = useState("");
+  const emojiResults = searchEmoji(emojiQuery);
 
   async function save() {
     if (!name.trim()) return;
@@ -183,21 +178,35 @@ function CategorySheet({
           ))}
         </div>
 
-        {/* emoji picker */}
+        {/* emoji picker with search */}
         <p className="mb-1.5 text-xs font-medium text-muted">Icon</p>
-        <div className="mb-4 grid grid-cols-8 gap-1.5">
-          {ICON_CHOICES.map((ic) => (
+        <div className="mb-2 flex items-center gap-2 rounded-xl bg-surface-2 px-3 py-2">
+          <Search size={16} className="text-faint" />
+          <input
+            value={emojiQuery}
+            onChange={(e) => setEmojiQuery(e.target.value)}
+            placeholder="Search emoji (e.g. coffee, car, rent)…"
+            className="w-full bg-transparent text-sm text-content outline-none placeholder:text-faint"
+          />
+        </div>
+        <div className="mb-2 grid max-h-40 grid-cols-8 gap-1.5 overflow-y-auto">
+          {emojiResults.map((ic) => (
             <button
               key={ic}
               onClick={() => setIcon(ic)}
               className={`flex h-9 items-center justify-center rounded-lg transition ${
-                icon === ic ? "bg-surface-2 ring-2 ring-brand-500" : "bg-surface-2"
+                icon === ic ? "bg-surface ring-2 ring-brand-500" : "bg-surface-2"
               }`}
               aria-label={ic}
             >
               <CategoryIcon name={ic} size={20} />
             </button>
           ))}
+          {emojiResults.length === 0 && (
+            <p className="col-span-8 py-3 text-center text-xs text-faint">
+              No match — type/paste any emoji below
+            </p>
+          )}
         </div>
         {/* allow any emoji via the keyboard's emoji key */}
         <input
