@@ -56,7 +56,10 @@ body {
 }
 
 .safe-top {
-  padding-top: env(safe-area-inset-top);
+  /* guarantee a comfortable top margin even when there's no notch inset
+     (env() resolves to 0 on desktop / non-notch devices). Mirrors the
+     status-bar breathing room reserved in the design. */
+  padding-top: max(env(safe-area-inset-top), 1.5rem);
 }
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);

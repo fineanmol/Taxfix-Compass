@@ -90,9 +90,9 @@ export default function App() {
         <button
           onClick={() => navigate("/add")}
           aria-label="Add transaction"
-          className="fixed bottom-24 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-white text-slate-900 shadow-fab active:scale-95 transition"
+          className="fixed bottom-28 right-5 z-40 flex h-[58px] w-[58px] items-center justify-center rounded-full bg-white text-slate-900 shadow-fab active:scale-95 transition"
         >
-          <Plus size={28} strokeWidth={2.5} />
+          <Plus size={22} strokeWidth={2.5} />
         </button>
       )}
 

@@ -34,56 +34,62 @@ export function ActivityChart({
   return (
     <div className="select-none">
       <div className="relative flex" style={{ height }}>
-        {/* plot area */}
+        {/* plot area: a shorter inner box (88% height, floor lifted off the
+            x-axis baseline) so bars, the avg line, and the "0" label all
+            share the same floor — matching Figma's ~12% bottom margin. */}
         <div className="relative flex-1">
-          {/* dashed average line */}
-          {avg > 0 && (
-            <div
-              className="pointer-events-none absolute inset-x-0 border-t border-dashed border-white/25"
-              style={{ bottom: `${avgPct}%` }}
-            />
-          )}
-          {/* bars + faint tracks */}
-          <div className="absolute inset-0 flex items-end gap-[2px]">
-            {bars.map((b, i) => {
-              const h = max ? (b.value / max) * 100 : 0;
-              const isActive = active === i;
-              return (
-                <button
-                  key={i}
-                  onClick={() => setActive(isActive ? null : i)}
-                  className="relative flex h-full flex-1 items-end justify-center"
-                >
-                  {/* faint full-height track */}
-                  <span className="absolute inset-y-0 w-[3px] rounded-full bg-white/[0.06]" />
-                  {/* value bar */}
-                  {b.value > 0 && (
-                    <span
-                      className="relative w-[3px] rounded-full bg-white transition-[height]"
-                      style={{ height: `${Math.max(2, h)}%`, opacity: active !== null && !isActive ? 0.4 : 1 }}
-                    />
-                  )}
-                  {/* tooltip on tap */}
-                  {isActive && (
-                    <span className="absolute -top-8 whitespace-nowrap rounded-lg bg-surface px-2 py-1 text-[11px] font-medium text-content shadow-card">
-                      {formatMoney(b.value, currency)}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+          <div className="absolute inset-x-0 bottom-[12%] top-0">
+            {/* dashed average line */}
+            {avg > 0 && (
+              <div
+                className="pointer-events-none absolute inset-x-0 border-t border-dashed border-white/25"
+                style={{ bottom: `${avgPct}%` }}
+              />
+            )}
+            {/* bars + faint tracks */}
+            <div className="absolute inset-0 flex items-end gap-[2px]">
+              {bars.map((b, i) => {
+                const h = max ? (b.value / max) * 100 : 0;
+                const isActive = active === i;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setActive(isActive ? null : i)}
+                    className="relative flex h-full flex-1 items-end justify-center"
+                  >
+                    {/* faint full-height track */}
+                    <span className="absolute inset-y-0 w-[3px] rounded-full bg-white/[0.06]" />
+                    {/* value bar */}
+                    {b.value > 0 && (
+                      <span
+                        className="relative w-[3px] rounded-full bg-white transition-[height]"
+                        style={{ height: `${Math.max(2, h)}%`, opacity: active !== null && !isActive ? 0.4 : 1 }}
+                      />
+                    )}
+                    {/* tooltip on tap */}
+                    {isActive && (
+                      <span className="absolute -top-8 whitespace-nowrap rounded-lg bg-surface px-2 py-1 text-[11px] font-medium text-content shadow-card">
+                        {formatMoney(b.value, currency)}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        {/* right-side y-axis labels (absolute, aligned to their heights) */}
+        {/* right-side y-axis labels, aligned to the same floor as the bars */}
         <div className="relative ml-2 w-12 text-right text-[11px] text-faint">
-          <span className="absolute right-0 top-0">{compact(max, currency)}</span>
-          {avg > 0 && avgPct < 86 && (
-            <span className="absolute right-0 -translate-y-1/2" style={{ bottom: `${avgPct}%` }}>
-              {compact(avg, currency)}
-            </span>
-          )}
-          <span className="absolute bottom-0 right-0">0</span>
+          <div className="absolute inset-x-0 bottom-[12%] top-0">
+            <span className="absolute right-0 top-0">{compact(max, currency)}</span>
+            {avg > 0 && avgPct < 86 && (
+              <span className="absolute right-0 -translate-y-1/2" style={{ bottom: `${avgPct}%` }}>
+                {compact(avg, currency)}
+              </span>
+            )}
+            <span className="absolute bottom-0 right-0">0</span>
+          </div>
         </div>
       </div>
 

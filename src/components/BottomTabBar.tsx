@@ -11,8 +11,8 @@ const tabs = [
 
 export function BottomTabBar() {
   return (
-    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 px-4 pb-3">
-      <div className="mx-auto flex max-w-md items-center justify-around rounded-full border border-line bg-surface/90 px-1 py-2 shadow-card backdrop-blur">
+    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 px-3 pb-4">
+      <div className="mx-auto flex h-[68px] max-w-md items-center justify-around rounded-[40px] border border-line bg-surface/90 px-1 shadow-card backdrop-blur">
         {tabs.map((t) => (
           <Tab key={t.to} {...t} />
         ))}
@@ -37,12 +37,12 @@ function Tab({
       to={to}
       end={end}
       className={({ isActive }) =>
-        `flex flex-1 flex-col items-center gap-0.5 rounded-full py-1.5 text-[11px] font-medium transition ${
-          isActive ? "bg-surface-2 text-content" : "text-faint"
+        `flex flex-1 flex-col items-center gap-1 rounded-[22px] py-2 text-[10px] transition ${
+          isActive ? "bg-surface-2 font-semibold text-content" : "font-medium text-faint"
         }`
       }
     >
-      <Icon size={20} />
+      <Icon size={22} />
       {label}
     </NavLink>
   );

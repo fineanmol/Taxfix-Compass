@@ -98,9 +98,9 @@ export function ActivityFilters({
         <button
           onClick={() => setSearching(true)}
           aria-label="Search"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-2 text-content"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-2 text-content"
         >
-          <Search size={18} />
+          <Search size={16} />
         </button>
         <Chip label={label(typeOpts, filters.txType, "Expenses")} onClick={() => setSheet("type")} active={filters.txType !== "expense"} />
         <Chip label={label(accOpts, filters.accountId, "All accounts")} onClick={() => setSheet("account")} active={filters.accountId !== "all"} />
@@ -134,7 +134,7 @@ function Chip({ label, onClick, active }: { label: string; onClick: () => void; 
   return (
     <button
       onClick={onClick}
-      className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-[15px] font-medium transition ${
+      className={`shrink-0 whitespace-nowrap rounded-[20px] px-3.5 py-2.5 text-sm font-medium transition ${
         active ? "bg-brand-500 text-white" : "bg-surface-2 text-content"
       }`}
     >

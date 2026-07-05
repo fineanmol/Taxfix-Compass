@@ -34,7 +34,7 @@ export default {
       },
       boxShadow: {
         card: "0 1px 2px rgba(0,0,0,0.04), 0 6px 20px rgba(0,0,0,0.06)",
-        fab: "0 6px 20px rgba(0,0,0,0.35)",
+        fab: "0 4px 18px rgba(0,0,0,0.55)",
       },
       backgroundImage: {
         // teal→blue gradient used for CTAs, premium banners, active accents

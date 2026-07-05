@@ -21,22 +21,22 @@ export function TransactionRow({
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center gap-3 px-4 py-3 text-left transition active:bg-surface-2"
+      className="flex w-full items-center gap-[13px] px-4 py-[11px] text-left transition active:bg-surface-2"
     >
       <span
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
         style={{ backgroundColor: color + "22", color }}
       >
-        <CategoryIcon name={category?.icon ?? "Circle"} size={22} />
+        <CategoryIcon name={category?.icon ?? "Circle"} size={20} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[17px] font-medium text-content">
+        <span className="block truncate text-[17px] text-content">
           {category?.name ?? "Uncategorized"}
         </span>
         {showNote && <span className="block truncate text-[13px] text-faint">{tx.note}</span>}
       </span>
       <span
-        className={`shrink-0 text-[17px] font-semibold ${
+        className={`shrink-0 text-[17px] ${
           tx.type === "income" ? "text-mint" : "text-content"
         }`}
       >

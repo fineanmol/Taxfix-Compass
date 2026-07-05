@@ -94,7 +94,7 @@ export default function Activity() {
   const label = filters.txType === "income" ? "Income" : "Expenses";
 
   return (
-    <div className="safe-top space-y-5 px-4 pt-6">
+    <div className="safe-top space-y-5 px-4 pt-4">
       {/* swipeable top region: header + chart. Swipe right → prev month,
           left → next month (respects the active filters). Heights are fixed so
           only the chart/total content changes — the filters & list below never
@@ -102,7 +102,7 @@ export default function Activity() {
       <div ref={swipeRef} className="touch-pan-y">
         <header className="flex h-[92px] flex-col items-center justify-center gap-1.5">
           <MonthPicker month={activeMonth} onChange={setMonth} />
-          <p className="text-[40px] font-bold leading-none tracking-tight text-content">{totalStr}</p>
+          <p className="text-[50px] font-bold leading-[52px] tracking-[-1.5px] text-content">{totalStr}</p>
           {/* reserve the comparison row so the header doesn't jump when it's absent */}
           <div className="flex h-4 items-center">
             <ComparisonPill pct={pct} label={prevStart.format("MMM")} />
@@ -140,9 +140,9 @@ export default function Activity() {
             : formatMoney(Math.abs(dayTotal), currency);
           return (
             <div key={day}>
-              <div className="mb-2 flex items-center justify-between px-1">
-                <h3 className="text-[15px] font-medium text-faint">{fmtDayHeader(Number(day))}</h3>
-                <span className="text-[15px] text-faint">
+              <div className="mb-2 flex items-center justify-between px-0.5">
+                <h3 className="text-sm font-medium text-faint">{fmtDayHeader(Number(day))}</h3>
+                <span className="text-sm text-faint">
                   {dayTotal < 0 ? "−" : "+"}
                   {dt}
                 </span>
@@ -150,7 +150,7 @@ export default function Activity() {
               <div className="overflow-hidden rounded-2xl bg-surface">
                 {items.map((tx, i) => (
                   <div key={tx.id}>
-                    {i > 0 && <div className="ml-[72px] h-px bg-line" />}
+                    {i > 0 && <div className="ml-[69px] h-px bg-line" />}
                     <SwipeToDelete onDelete={() => deleteTransaction(tx.id)}>
                       <TransactionRow
                         tx={tx}
