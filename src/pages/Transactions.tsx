@@ -28,7 +28,7 @@ export default function Transactions() {
   const [showCatPicker, setShowCatPicker] = useState(false);
 
   const hide = settings?.hideBalances ?? false;
-  const currency = settings?.currency ?? "USD";
+  const currency = settings?.currency ?? "EUR";
   const catName = useMemo(
     () => new Map(categories.map((c) => [c.id, c.name.toLowerCase()])),
     [categories]

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
-import { Wallet, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
+import { AppLogo } from "./components/AppLogo";
 import { BottomTabBar } from "./components/BottomTabBar";
 import { ensureSeeded } from "./lib/seed";
 import { materializeRecurring } from "./lib/recurring";
@@ -24,6 +25,7 @@ import ImportStatement from "./pages/ImportStatement";
 import Detail from "./pages/Detail";
 import Groups from "./pages/Groups";
 import SettingsPage from "./pages/Settings";
+import Explore from "./pages/Explore";
 
 // routes shown full-screen (no bottom tab bar)
 const FULLSCREEN = ["/add", "/quick"];
@@ -50,9 +52,7 @@ export default function App() {
   if (!ready) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3">
-        <div className="flex h-16 w-16 animate-pulse items-center justify-center rounded-2xl bg-brand-gradient text-white shadow-fab">
-          <Wallet size={30} />
-        </div>
+        <AppLogo className="h-16 w-16 animate-pulse rounded-2xl shadow-fab" />
         <div className="text-xl font-bold tracking-tight text-content">Spend</div>
       </div>
     );
@@ -84,6 +84,7 @@ export default function App() {
           <Route path="/detail" element={<Detail />} />
           <Route path="/groups" element={<Groups />} />
           <Route path="/import" element={<ImportStatement />} />
+          <Route path="/explore" element={<Explore />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </main>

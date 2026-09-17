@@ -37,7 +37,7 @@ export default function Detail() {
   const groupId = params.get("group");
 
   const hide = settings?.hideBalances ?? false;
-  const currency = settings?.currency ?? "USD";
+  const currency = settings?.currency ?? "EUR";
   const dark = isDark(settings?.theme ?? "system");
 
   const { title, subtitle, txs } = useMemo(() => {

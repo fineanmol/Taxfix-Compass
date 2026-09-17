@@ -19,7 +19,7 @@ export default function Overview() {
   const txs = useTransactionsInRange(start.valueOf(), end.valueOf());
 
   const hide = settings?.hideBalances ?? false;
-  const currency = settings?.currency ?? "USD";
+  const currency = settings?.currency ?? "EUR";
 
   // spend per day-of-month
   const perDay = useMemo(() => {

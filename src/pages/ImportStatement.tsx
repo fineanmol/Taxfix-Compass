@@ -55,7 +55,7 @@ export default function ImportStatement() {
   // imported transactions inherit the target account's currency (falling back
   // to the app's default currency), not a hardcoded one
   const currency =
-    accounts.find((a) => a.id === accountId)?.currency ?? settings?.currency ?? "USD";
+    accounts.find((a) => a.id === accountId)?.currency ?? settings?.currency ?? "EUR";
 
   const [busy, setBusy] = useState(false);
   const [warn, setWarn] = useState("");

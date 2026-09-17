@@ -1,12 +1,12 @@
 import { NavLink } from "react-router-dom";
-import { Receipt, PieChart, Target, Sparkles, Settings } from "lucide-react";
+import { Receipt, PieChart, Target, Sparkles, Compass } from "lucide-react";
 
 const tabs = [
   { to: "/", label: "Activity", icon: Receipt, end: true },
   { to: "/summary", label: "Summary", icon: PieChart },
   { to: "/budgets", label: "Budget", icon: Target },
   { to: "/for-you", label: "For You", icon: Sparkles },
-  { to: "/settings", label: "Settings", icon: Settings },
+  { to: "/explore", label: "Explore", icon: Compass },
 ];
 
 export function BottomTabBar() {

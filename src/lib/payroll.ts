@@ -10,7 +10,7 @@ export const PAYROLL_EXPENSE_CATEGORIES: Array<Pick<Category, "name" | "icon" | 
   { name: "Solidarity Surcharge", icon: "📑", color: "#8E8E93" },
   { name: "Church Tax", icon: "⛪", color: "#AF52DE" },
   { name: "Pension Insurance", icon: "🧓", color: "#5856D6" },
-  { name: "Unemployment Insurance", icon: "☂️", color: "#0066CC" },
+  { name: "Unemployment Insurance", icon: "☂️", color: "#668CFF" },
   { name: "Health Insurance", icon: "🩺", color: "#30B0C7" },
   { name: "Care Insurance", icon: "🫶", color: "#FF2D55" },
 ];

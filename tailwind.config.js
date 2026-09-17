@@ -5,22 +5,47 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Quanto-style teal accent scale
-        brand: {
-          50: "#e6f6f1",
-          100: "#c5eae0",
-          200: "#93d7c5",
-          300: "#5fc2a8",
-          400: "#3eae91",
-          500: "#2f9b80", // primary teal
-          600: "#2a8a72",
-          700: "#237360",
-          800: "#1c5c4d",
-          900: "#134239",
+        evergreen: {
+          light: "#ECFFC7",
+          calm: "#CEF5A4",
+          vivid: "#ADEE68",
+          dark: "#36893B",
+          veryDark: "#154618",
         },
-        // Positive/negative accents
-        mint: "#34d399", // green for income/positive
-        // Semantic tokens -> CSS vars (flip in dark mode)
+        offwhite: {
+          light: "#FDF8F2",
+          calm: "#EAE0D7",
+          vivid: "#9A9288",
+        },
+        lilac: {
+          light: "#F6EBFE",
+          calm: "#DBB9F3",
+          vivid: "#BC73F2",
+        },
+        gold: {
+          light: "#FFEFD3",
+          calm: "#F8C677",
+          vivid: "#F8A21A",
+        },
+        blue: {
+          light: "#E8F0FF",
+          calm: "#B6C5F3",
+          vivid: "#668CFF",
+        },
+        // Aliases for existing `brand-*` utilities
+        brand: {
+          50: "#ECFFC7",
+          100: "#CEF5A4",
+          200: "#ADEE68",
+          300: "#ADEE68",
+          400: "#36893B",
+          500: "#36893B",
+          600: "#36893B",
+          700: "#154618",
+          800: "#154618",
+          900: "#154618",
+        },
+        mint: "#36893B",
         bg: "rgb(var(--bg) / <alpha-value>)",
         surface: "rgb(var(--surface) / <alpha-value>)",
         "surface-2": "rgb(var(--surface-2) / <alpha-value>)",
@@ -37,8 +62,7 @@ export default {
         fab: "0 4px 18px rgba(0,0,0,0.55)",
       },
       backgroundImage: {
-        // teal→blue gradient used for CTAs, premium banners, active accents
-        "brand-gradient": "linear-gradient(135deg, #2f9b80 0%, #2b7f9e 100%)",
+        "brand-gradient": "linear-gradient(135deg, #36893B 0%, #154618 100%)",
       },
     },
   },
