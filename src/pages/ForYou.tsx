@@ -81,12 +81,12 @@ export default function ForYou() {
           className="pointer-events-none absolute inset-0 opacity-90"
           style={{
             background:
-              "radial-gradient(ellipse 80% 60% at 20% -10%, rgba(47,155,128,0.35), transparent 55%), radial-gradient(ellipse 70% 50% at 90% 20%, rgba(43,127,158,0.28), transparent 50%)",
+              "radial-gradient(ellipse 80% 60% at 20% -10%, rgba(248,162,26,0.22), transparent 55%), radial-gradient(ellipse 70% 50% at 90% 20%, rgba(188,115,242,0.16), transparent 50%)",
           }}
         />
         <header className="relative flex items-start justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-400">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-vivid">
               For you
             </p>
             <h1 className="mt-1 text-[28px] font-bold leading-tight tracking-tight text-content">
@@ -96,29 +96,29 @@ export default function ForYou() {
             </h1>
           </div>
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-surface shadow-card">
-            <Sparkles size={20} className="text-brand-500" />
+            <Sparkles size={20} className="text-gold-vivid" />
           </div>
         </header>
 
         {/* Living refund forecast card */}
-        <div className="relative mt-5 overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-teal-950 p-5 text-white shadow-card">
-          <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-teal-400/20 blur-2xl" />
-          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-teal-200/90">
+        <div className="relative mt-5 overflow-hidden rounded-3xl bg-ink p-5 text-offwhite-light shadow-card">
+          <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-gold-vivid/25 blur-2xl" />
+          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-gold-calm">
             <Flame size={14} />
             TaxFix forecast · {dayjs().year()}
           </div>
           <p className="mt-3 text-4xl font-bold tracking-tight tabular-nums">
             €{forecast.toLocaleString("de-DE")}
           </p>
-          <p className="mt-1 text-sm text-white/70">
+          <p className="mt-1 text-sm text-offwhite-light/70">
             Estimated refund if you apply the offers below
           </p>
           <div className="mt-4 flex items-center gap-2">
-            <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-teal-100">
+            <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-offwhite-light">
               {applied.size} offer{applied.size === 1 ? "" : "s"} applied
             </span>
             {estimatedTotal > 0 && (
-              <span className="rounded-full bg-teal-400/20 px-3 py-1 text-xs font-semibold text-teal-200">
+              <span className="rounded-full bg-gold-vivid/20 px-3 py-1 text-xs font-semibold text-gold-calm">
                 +€{estimatedTotal} unlocked
               </span>
             )}
@@ -187,15 +187,15 @@ export default function ForYou() {
               <article
                 key={offer.id}
                 className={`overflow-hidden rounded-3xl border bg-surface shadow-card transition ${
-                  isOn ? "border-brand-400/50" : "border-line/60"
+                  isOn ? "border-gold-calm/60" : "border-line/60"
                 }`}
               >
                 <div className="flex gap-3 p-4">
                   <div
                     className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-sm font-bold ${
                       isOn
-                        ? "bg-brand-gradient text-white"
-                        : "bg-surface-2 text-brand-600 dark:text-brand-300"
+                        ? "bg-brand-500 text-white"
+                        : "bg-gold-light text-gold-vivid dark:bg-gold-vivid/20 dark:text-gold-calm"
                     }`}
                   >
                     {offer.estimate}
@@ -213,7 +213,7 @@ export default function ForYou() {
                       onClick={() => applyTax(offer)}
                       className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition active:scale-[0.98] ${
                         isOn
-                          ? "bg-brand-100 text-brand-700 dark:bg-brand-900/50 dark:text-brand-200"
+                          ? "bg-evergreen-light text-evergreen-veryDark dark:bg-evergreen-dark/40 dark:text-evergreen-calm"
                           : "bg-content text-bg"
                       }`}
                     >
@@ -295,7 +295,7 @@ export default function ForYou() {
       {/* Toast */}
       {toast && (
         <div className="pointer-events-none fixed inset-x-0 bottom-28 z-50 flex justify-center px-4">
-          <div className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white shadow-fab">
+          <div className="rounded-2xl bg-ink px-4 py-3 text-sm font-medium text-offwhite-light shadow-fab">
             {toast.message}
           </div>
         </div>

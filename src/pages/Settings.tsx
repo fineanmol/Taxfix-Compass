@@ -89,7 +89,7 @@ export default function SettingsPage() {
           <ThemeToggle value={settings.theme} onChange={setTheme} />
         </Row>
         <Row label="Hide balances">
-          <button onClick={toggleHide} className="rounded-full bg-surface-2 p-2 text-brand-700">
+          <button onClick={toggleHide} className="rounded-full bg-surface-2 p-2 text-content">
             {settings.hideBalances ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </Row>
@@ -101,7 +101,7 @@ export default function SettingsPage() {
           onClick={() => navigate("/categories")}
           className="flex w-full items-center gap-3 py-2.5 text-left"
         >
-          <Shapes size={18} className="text-brand-600" />
+          <Shapes size={18} className="text-muted" />
           <span className="flex-1 text-sm text-content">Categories</span>
           <ChevronRight size={18} className="text-faint" />
         </button>
@@ -109,7 +109,7 @@ export default function SettingsPage() {
           onClick={() => navigate("/groups")}
           className="flex w-full items-center gap-3 py-2.5 text-left"
         >
-          <Layers size={18} className="text-brand-600" />
+          <Layers size={18} className="text-muted" />
           <span className="flex-1 text-sm text-content">Groups</span>
           <ChevronRight size={18} className="text-faint" />
         </button>
@@ -117,7 +117,7 @@ export default function SettingsPage() {
           onClick={() => navigate("/accounts")}
           className="flex w-full items-center gap-3 py-2.5 text-left"
         >
-          <Wallet size={18} className="text-brand-600" />
+          <Wallet size={18} className="text-muted" />
           <span className="flex-1 text-sm text-content">Accounts</span>
           <ChevronRight size={18} className="text-faint" />
         </button>
@@ -127,7 +127,7 @@ export default function SettingsPage() {
       <Section
         title="Recurring transactions"
         action={
-          <button onClick={() => setShowRecur(true)} className="text-brand-700">
+          <button onClick={() => setShowRecur(true)} className="text-brand-500">
             <Plus size={20} />
           </button>
         }
@@ -164,7 +164,7 @@ export default function SettingsPage() {
       {/* data */}
       <Section title="Bank &amp; data">
         <button onClick={() => navigate("/import")} className="flex w-full items-center gap-3 py-2.5 text-left">
-          <Landmark size={18} className="text-brand-600" />
+          <Landmark size={18} className="text-muted" />
           <span className="flex-1 text-sm text-content">Import bank / card statement</span>
           <ChevronRight size={18} className="text-faint" />
         </button>
@@ -172,16 +172,16 @@ export default function SettingsPage() {
           onClick={() => navigate("/import?kind=payslip")}
           className="flex w-full items-center gap-3 py-2.5 text-left"
         >
-          <Receipt size={18} className="text-brand-600" />
+          <Receipt size={18} className="text-muted" />
           <span className="flex-1 text-sm text-content">Import German payslip</span>
           <ChevronRight size={18} className="text-faint" />
         </button>
         <button onClick={downloadCsv} className="flex w-full items-center gap-3 py-2.5 text-left">
-          <Download size={18} className="text-brand-600" />
+          <Download size={18} className="text-muted" />
           <span className="text-sm text-content">Export CSV</span>
         </button>
         <button onClick={() => fileRef.current?.click()} className="flex w-full items-center gap-3 py-2.5 text-left">
-          <Upload size={18} className="text-brand-600" />
+          <Upload size={18} className="text-muted" />
           <span className="text-sm text-content">Import simple CSV</span>
         </button>
         {importMsg && <p className="text-xs text-mint">{importMsg}</p>}
@@ -202,7 +202,7 @@ export default function SettingsPage() {
           }}
           className="flex w-full items-center gap-3 py-2.5 text-left"
         >
-          <Sparkles size={18} className="text-brand-600" />
+          <Sparkles size={18} className="text-muted" />
           <span className="flex-1 text-sm text-content">
             {settings.mockDataMode ? "Reload demo data" : "Load demo data"}
           </span>
@@ -232,7 +232,7 @@ export default function SettingsPage() {
           onClick={() => navigate("/setup-quickadd")}
           className="flex w-full items-center gap-3 py-2.5 text-left"
         >
-          <Smartphone size={18} className="text-brand-600" />
+          <Smartphone size={18} className="text-muted" />
           <span className="flex-1 text-sm text-content">Set up triple-tap quick add</span>
           <ChevronRight size={18} className="text-faint" />
         </button>
@@ -240,7 +240,7 @@ export default function SettingsPage() {
           onClick={() => navigate("/quick")}
           className="flex w-full items-center gap-3 py-2.5 text-left"
         >
-          <Zap size={18} className="text-brand-600" />
+          <Zap size={18} className="text-muted" />
           <span className="flex-1 text-sm text-content">Open quick-add screen</span>
           <ChevronRight size={18} className="text-faint" />
         </button>
@@ -321,7 +321,7 @@ function ThemeToggle({
             aria-label={o.label}
             title={o.label}
             className={`rounded-full p-2 transition ${
-              active ? "bg-brand-gradient text-white shadow-card" : "text-muted"
+              active ? "bg-brand-500 text-white shadow-card" : "text-muted"
             }`}
           >
             <Icon size={16} />
@@ -343,7 +343,7 @@ function SyncControls({ configured }: { configured: boolean }) {
   if (!configured) {
     return (
       <p className="py-2 text-sm text-faint">
-        Optional. Add Supabase keys to <code className="text-brand-700">.env.local</code> to
+        Optional. Add Supabase keys to <code className="text-content">.env.local</code> to
         enable cross-device sync. Until then, all data stays on this device.
       </p>
     );
@@ -446,7 +446,7 @@ function AddRecurringSheet({
     <div className="fixed inset-0 z-40 flex items-end bg-black/30" onClick={onClose}>
       <div className="safe-bottom w-full max-w-md rounded-t-3xl bg-surface p-5" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center gap-2">
-          <Repeat size={20} className="text-brand-700" />
+          <Repeat size={20} className="text-muted" />
           <h2 className="text-lg font-bold text-content">New recurring</h2>
         </div>
         <div className="space-y-3">
@@ -456,7 +456,7 @@ function AddRecurringSheet({
                 key={t}
                 onClick={() => { setType(t); setCategoryId(""); }}
                 className={`flex-1 rounded-full py-1.5 text-sm font-medium capitalize ${
-                  type === t ? "bg-surface text-brand-700 shadow-card" : "text-muted"
+                  type === t ? "bg-surface text-content shadow-card" : "text-muted"
                 }`}
               >
                 {t}

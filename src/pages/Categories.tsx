@@ -11,8 +11,8 @@ import type { Category, TxType } from "@/db/types";
 
 
 const COLOR_CHOICES = [
-  "#FF3B30", "#FF9500", "#FFCC00", "#34C759", "#00C7BE",
-  "#5AC8FA", "#36893B", "#5856D6", "#AF52DE", "#FF2D55", "#8E8E93",
+  "#FF3B30", "#F8A21A", "#F8C677", "#36893B", "#154618",
+  "#668CFF", "#B6C5F3", "#BC73F2", "#DBB9F3", "#9A9288", "#0C0B0A",
 ];
 
 export default function Categories() {

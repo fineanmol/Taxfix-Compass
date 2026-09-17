@@ -23,7 +23,7 @@ export function DemoDataCta() {
             setBusy(false);
           }
         }}
-        className="inline-flex items-center gap-2 rounded-full bg-brand-gradient px-4 py-2 text-sm font-semibold text-white shadow-card disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-full bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-card disabled:opacity-50"
       >
         <Sparkles size={16} />
         {busy ? "Loading…" : "Load demo data"}

@@ -40,10 +40,12 @@ export default function SetupQuickAdd() {
       </div>
 
       {/* hero */}
-      <div className="overflow-hidden rounded-2xl bg-brand-gradient p-5 text-white shadow-card">
-        <Zap size={26} />
-        <p className="mt-2 text-lg font-bold">Add an expense in 2 seconds</p>
-        <p className="mt-1 text-sm text-white/80">
+      <div className="overflow-hidden rounded-2xl bg-gold-light p-5 text-content shadow-card dark:bg-gold-vivid/15">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-white">
+          <Zap size={20} />
+        </span>
+        <p className="mt-3 text-lg font-bold">Add an expense in 2 seconds</p>
+        <p className="mt-1 text-sm text-muted">
           Triple-tap the back of your iPhone to jump straight into quick entry — no unlocking,
           no searching for the app.
         </p>
@@ -111,7 +113,7 @@ function Step({ n, title, children }: { n: number; title: string; children: Reac
   return (
     <section className="card p-4">
       <div className="flex items-center gap-2">
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-gradient text-xs font-bold text-white">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">
           {n}
         </span>
         <h2 className="font-semibold text-content">{title}</h2>

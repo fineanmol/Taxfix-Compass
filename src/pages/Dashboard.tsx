@@ -83,14 +83,14 @@ export default function Summary() {
         <button
           onClick={toggleHide}
           aria-label="Toggle balances"
-          className="rounded-full bg-surface p-2.5 text-brand-500 shadow-card"
+          className="rounded-full bg-surface p-2.5 text-content shadow-card"
         >
           {hide ? <EyeOff size={20} /> : <Eye size={20} />}
         </button>
       </header>
 
       {payrollTxs.length > 0 && (
-        <section className="card overflow-hidden p-1 ring-2 ring-brand-500/30">
+        <section className="card overflow-hidden p-1 ring-1 ring-gold-calm/50">
           <div className="flex items-center justify-between px-3 py-2.5">
             <h2 className="text-sm font-semibold text-content">Payroll · {start.format("MMM")}</h2>
             <span className="text-sm font-semibold text-mint">{fmt(payrollIncome)}</span>
@@ -169,7 +169,7 @@ export default function Summary() {
           onClick={() => navigate("/budgets")}
           className="card flex items-center gap-3 p-4 active:bg-surface-2"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-2 text-brand-600">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gold-light text-gold-vivid dark:bg-gold-vivid/20">
             <Target size={20} />
           </span>
           <span className="flex-1 text-left font-medium text-content">Budgets</span>
@@ -178,7 +178,7 @@ export default function Summary() {
           onClick={() => navigate("/accounts")}
           className="card flex items-center gap-3 p-4 active:bg-surface-2"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-2 text-brand-600">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-light text-blue-vivid dark:bg-blue-vivid/20">
             <Wallet size={20} />
           </span>
           <span className="flex-1 text-left font-medium text-content">Accounts</span>

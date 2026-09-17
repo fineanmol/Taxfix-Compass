@@ -26,7 +26,7 @@ export function TransactionRow({
     <button
       onClick={onClick}
       className={`flex w-full items-center gap-[13px] px-4 py-[11px] text-left transition active:bg-surface-2 ${
-        emphasize ? "bg-brand-500/10" : ""
+        emphasize ? "bg-gold-light/70 dark:bg-gold-vivid/10" : ""
       }`}
     >
       <span
