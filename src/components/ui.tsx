@@ -38,8 +38,8 @@ export function IconButton({
   const base = "flex h-10 w-10 items-center justify-center rounded-full transition active:scale-95 disabled:opacity-40";
   const styles =
     variant === "primary"
-      ? "bg-brand-gradient text-white shadow-card"
-      : "bg-surface text-brand-600 shadow-card";
+      ? "bg-brand-500 text-white shadow-card"
+      : "bg-surface text-content shadow-card";
   return (
     <button aria-label={label} onClick={onClick} disabled={disabled} className={`${base} ${styles}`}>
       <Icon size={20} />

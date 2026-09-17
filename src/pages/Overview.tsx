@@ -73,7 +73,7 @@ export default function Overview() {
           {cells.map((day, i) => {
             if (day === null) return <div key={i} />;
             const amt = perDay.get(day) ?? 0;
-            const intensity = amt > 0 ? 0.18 + 0.82 * (amt / maxDay) : 0;
+            const intensity = amt > 0 ? 0.38 + 0.62 * (amt / maxDay) : 0;
             const isToday = isThisMonth && day === today.date();
             return (
               <div
@@ -82,7 +82,7 @@ export default function Overview() {
                   isToday ? "ring-2 ring-brand-400" : ""
                 }`}
                 style={{
-                  backgroundColor: amt > 0 ? `rgba(47,155,128,${intensity})` : "rgb(var(--surface-2))",
+                  backgroundColor: amt > 0 ? `rgba(54,137,59,${intensity})` : "rgb(var(--surface-2))",
                 }}
               >
                 <span className={`text-[13px] font-semibold ${amt > 0 ? "text-white" : "text-muted"}`}>

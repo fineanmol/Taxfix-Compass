@@ -21,7 +21,7 @@ export function PeriodSwitcher({
           key={o.key}
           onClick={() => onChange(o.key)}
           className={`flex-1 rounded-full py-1.5 text-sm font-medium transition ${
-            value === o.key ? "bg-surface text-brand-700 shadow-card" : "text-muted"
+            value === o.key ? "bg-surface text-content shadow-card" : "text-muted"
           }`}
         >
           {o.label}

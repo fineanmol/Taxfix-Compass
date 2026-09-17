@@ -2,27 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ---- Semantic theme tokens (Taxfix warm neutrals + green; R G B triples) ---- */
+/* Semantic theme tokens.
+   Surfaces follow Taxfix marketing: warm off-white, not evergreen.
+   Green is an accent (CTAs, selected, key numbers) — never a page wash. */
 :root {
-  --bg: 255 255 255;        /* light: white page background */
-  --bg-grad: 255 255 255;   /* solid white (no lime wash) */
+  --bg: 253 248 242; /* offwhite light #FDF8F2 */
+  --bg-grad: 255 239 211; /* gold light #FFEFD3 — warm halo, not lime */
   --surface: 255 255 255;
-  --surface-2: 234 224 215;
+  --surface-2: 234 224 215; /* offwhite calm #EAE0D7 */
   --line: 221 212 203;
-  --content: 12 11 10;
-  --muted: 96 90 84;
-  --faint: 154 146 136;
+  --content: 12 11 10; /* near-black #0C0B0A */
+  --muted: 92 86 80; /* warm taupe — readable secondary (vivid #9A9288 is faint) */
+  --faint: 154 146 136; /* offwhite vivid #9A9288 */
   color-scheme: light;
 }
 
 .dark {
-  --bg: 21 70 24; /* evergreen veryDark #154618 */
-  --bg-grad: 54 137 59; /* evergreen dark #36893B */
-  --surface: 28 42 30;
-  --surface-2: 38 56 40;
-  --line: 54 72 56;
+  --bg: 12 11 10; /* near-black #0C0B0A, not evergreen veryDark */
+  --bg-grad: 22 20 18; /* slight warm lift, no green */
+  --surface: 28 26 24;
+  --surface-2: 42 38 35;
+  --line: 58 53 48;
   --content: 253 248 242; /* offwhite light */
-  --muted: 234 224 215; /* offwhite calm */
+  --muted: 184 176 166;
   --faint: 154 146 136; /* offwhite vivid */
   color-scheme: dark;
 }
@@ -52,7 +54,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(180deg, rgb(var(--bg-grad)) 0%, rgb(var(--bg)) 42%);
+  background: linear-gradient(180deg, rgb(var(--bg-grad)) 0%, rgb(var(--bg)) 28%);
   pointer-events: none;
 }
 
@@ -71,7 +73,7 @@ body {
     @apply rounded-2xl bg-surface shadow-card;
   }
   .btn-primary {
-    @apply rounded-xl bg-brand-gradient px-4 py-3 font-semibold text-white active:scale-[0.98] transition;
+    @apply rounded-xl bg-brand-500 px-4 py-3 font-semibold text-white active:scale-[0.98] transition;
   }
   .input {
     @apply w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-content outline-none focus:border-brand-500;

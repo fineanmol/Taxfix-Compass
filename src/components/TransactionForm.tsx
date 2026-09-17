@@ -205,7 +205,7 @@ export function TransactionForm({
               key={a.id}
               onClick={() => setAccountId(a.id)}
               className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition ${
-                a.id === accountId ? "bg-brand-gradient text-white" : "bg-surface text-muted shadow-card"
+                a.id === accountId ? "bg-brand-500 text-white" : "bg-surface text-muted shadow-card"
               }`}
             >
               {a.name}

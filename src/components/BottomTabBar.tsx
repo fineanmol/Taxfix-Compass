@@ -38,7 +38,7 @@ function Tab({
       end={end}
       className={({ isActive }) =>
         `flex flex-1 flex-col items-center gap-1 rounded-[22px] py-2 text-[10px] transition ${
-          isActive ? "bg-surface-2 font-semibold text-content" : "font-medium text-faint"
+          isActive ? "bg-brand-500 font-semibold text-white" : "font-medium text-faint"
         }`
       }
     >

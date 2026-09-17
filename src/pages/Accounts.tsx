@@ -73,10 +73,10 @@ export default function Accounts() {
       />
 
       {/* total-balance summary card */}
-      <div className="overflow-hidden rounded-2xl bg-brand-gradient p-5 text-white shadow-card">
-        <p className="text-sm text-white/70">Total balance</p>
+      <div className="overflow-hidden rounded-2xl bg-content p-5 text-bg shadow-card">
+        <p className="text-sm text-bg/70">Total balance</p>
         <p className="mt-1 text-3xl font-bold tracking-tight">{fmt(total, defaultCurrency)}</p>
-        <p className="mt-1 text-xs text-white/60">
+        <p className="mt-1 text-xs text-bg/60">
           {accounts.length} account{accounts.length === 1 ? "" : "s"} · {defaultCurrency}
         </p>
       </div>

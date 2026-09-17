@@ -107,7 +107,7 @@ export default function Groups() {
   );
 }
 
-const GROUP_COLORS = ["#36893B", "#34C759", "#FF9500", "#AF52DE", "#FF2D55", "#00C7BE", "#5856D6", "#8E8E93"];
+const GROUP_COLORS = ["#36893B", "#668CFF", "#F8A21A", "#BC73F2", "#154618", "#9A9288", "#F8C677", "#B6C5F3"];
 
 function GroupSheet({
   group,
@@ -173,7 +173,7 @@ function GroupSheet({
             <button
               key={c.id}
               onClick={() => toggle(c.id)}
-              className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-sm ${catIds.includes(c.id) ? "bg-brand-gradient text-white" : "bg-surface-2 text-muted"}`}
+              className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-sm ${catIds.includes(c.id) ? "bg-brand-500 text-white" : "bg-surface-2 text-muted"}`}
             >
               <CategoryIcon name={c.icon} size={14} /> {c.name}
             </button>

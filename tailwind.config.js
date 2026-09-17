@@ -46,6 +46,7 @@ export default {
           900: "#154618",
         },
         mint: "#36893B",
+        ink: "#0C0B0A",
         bg: "rgb(var(--bg) / <alpha-value>)",
         surface: "rgb(var(--surface) / <alpha-value>)",
         "surface-2": "rgb(var(--surface-2) / <alpha-value>)",
@@ -58,11 +59,11 @@ export default {
         sans: ["-apple-system", "BlinkMacSystemFont", "SF Pro Display", "Segoe UI", "Roboto", "sans-serif"],
       },
       boxShadow: {
-        card: "0 1px 2px rgba(0,0,0,0.04), 0 6px 20px rgba(0,0,0,0.06)",
-        fab: "0 4px 18px rgba(0,0,0,0.55)",
+        card: "0 1px 2px rgba(12,11,10,0.04), 0 8px 24px rgba(12,11,10,0.06)",
+        fab: "0 6px 20px rgba(54, 137, 59, 0.38)",
       },
       backgroundImage: {
-        "brand-gradient": "linear-gradient(135deg, #36893B 0%, #154618 100%)",
+        "brand-gradient": "linear-gradient(180deg, #36893B 0%, #154618 100%)",
       },
     },
   },
