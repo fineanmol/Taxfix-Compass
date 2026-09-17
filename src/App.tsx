@@ -36,12 +36,17 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
-      await ensureSeeded();
-      await loadSettings();
-      await materializeRecurring();
-      setReady(true);
-      // one-time: offer to fix currency if device locale differs from data
-      maybeOfferCurrencyFix();
+      try {
+        await ensureSeeded();
+        await loadSettings();
+        await materializeRecurring();
+        // one-time: offer to fix currency if device locale differs from data
+        maybeOfferCurrencyFix();
+      } catch (err) {
+        console.error("Failed to initialize app", err);
+      } finally {
+        setReady(true);
+      }
     })();
     // keep in sync with OS theme changes while in "system" mode
     return watchSystemTheme(() => useSettings.getState().settings?.theme ?? "system");

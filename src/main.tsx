@@ -9,12 +9,16 @@ import { applyTheme } from "./lib/theme";
 
 // Auto-update the service worker and reload as soon as a new build is ready,
 // so users are never stuck on a stale cached bundle.
-const updateSW = registerSW({
-  immediate: true,
-  onNeedRefresh() {
-    updateSW(true); // activate the new SW and reload
-  },
-});
+try {
+  const updateSW = registerSW({
+    immediate: true,
+    onNeedRefresh() {
+      updateSW(true); // activate the new SW and reload
+    },
+  });
+} catch (err) {
+  console.error("Service worker registration failed", err);
+}
 
 // Console helpers stay in dev; production uses Settings / empty-state demo data.
 if (import.meta.env.DEV && typeof window !== "undefined") {
