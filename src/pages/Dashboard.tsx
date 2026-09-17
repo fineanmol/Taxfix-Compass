@@ -9,7 +9,7 @@ import { MonthPicker } from "@/components/MonthPicker";
 import { useCategories, useTransactionsInRange, useLatestMonthWithData, useTransactionCount } from "@/hooks/useData";
 import { useSettings } from "@/store/useSettings";
 import { spendByCategory, totals, percentChange } from "@/lib/calc";
-import { formatMoney, maskMoney } from "@/lib/money";
+import { DEFAULT_CURRENCY, formatMoney, maskMoney } from "@/lib/money";
 import { DemoDataCta } from "@/components/DemoDataCta";
 import { isPayrollCategoryName, payrollDisplayRank } from "@/lib/payroll";
 
@@ -35,7 +35,7 @@ export default function Summary() {
   const prevTxs = useTransactionsInRange(prevStart.valueOf(), prevEnd.valueOf());
 
   const hide = settings?.hideBalances ?? false;
-  const currency = settings?.currency ?? "USD";
+  const currency = settings?.currency ?? DEFAULT_CURRENCY;
 
   const { income, expense } = totals(txs);
   const prevExpense = totals(prevTxs).expense;

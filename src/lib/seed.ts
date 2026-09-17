@@ -1,7 +1,7 @@
 import { db } from "@/db/db";
 import type { Account, Category, Settings } from "@/db/types";
 import { uid } from "./id";
-import { CURRENCIES } from "./money";
+import { CURRENCIES, DEFAULT_CURRENCY } from "./money";
 import { PAYROLL_EXPENSE_CATEGORIES, PAYROLL_INCOME_CATEGORIES } from "./payroll";
 
 // region → currency, limited to the currencies the app supports
@@ -14,7 +14,7 @@ const REGION_CURRENCY: Record<string, string> = {
   SK: "EUR", SI: "EUR", LU: "EUR", CY: "EUR", MT: "EUR",
 };
 
-/** Guess a supported currency from the browser locale; falls back to USD. */
+/** Guess a supported currency from the browser locale; falls back to EUR. */
 function guessLocaleCurrency(): string {
   try {
     const region =
@@ -23,16 +23,16 @@ function guessLocaleCurrency(): string {
     const code = region ? REGION_CURRENCY[region] : undefined;
     if (code && CURRENCIES.some((c) => c.code === code)) return code;
   } catch {
-    /* ignore — fall through to USD */
+    /* ignore — fall through to EUR */
   }
-  return "USD";
+  return DEFAULT_CURRENCY;
 }
 
 // Emoji icons + Apple system colors — vibrant, native on iPhone.
 const DEFAULT_EXPENSE_CATEGORIES: Array<Pick<Category, "name" | "icon" | "color">> = [
   { name: "Food & Drink", icon: "🍔", color: "#FF9500" },
   { name: "Groceries", icon: "🛒", color: "#FF3B30" },
-  { name: "Transport", icon: "🚗", color: "#0066CC" },
+  { name: "Transport", icon: "🚗", color: "#36893B" },
   { name: "Shopping", icon: "🛍️", color: "#5AC8FA" },
   { name: "Bills", icon: "🧾", color: "#FF2D55" },
   { name: "Rent", icon: "🏠", color: "#5856D6" },
@@ -57,7 +57,7 @@ const DEFAULT_EXPENSE_CATEGORIES: Array<Pick<Category, "name" | "icon" | "color"
 const DEFAULT_INCOME_CATEGORIES: Array<Pick<Category, "name" | "icon" | "color">> = [
   ...PAYROLL_INCOME_CATEGORIES,
   { name: "Salary", icon: "💰", color: "#32D74B" },
-  { name: "Freelance", icon: "💼", color: "#0066CC" },
+  { name: "Freelance", icon: "💼", color: "#36893B" },
   { name: "Business", icon: "🏢", color: "#5856D6" },
   { name: "Investments", icon: "📈", color: "#00C7BE" },
   { name: "Interest", icon: "🏦", color: "#30B0C7" },
@@ -78,9 +78,7 @@ export async function ensureSeeded(): Promise<void> {
 
   const now = Date.now();
 
-  // Best-effort guess of the user's currency from their locale/timezone, so a
-  // first-run account isn't stuck on USD for EU/UK users. They can change it in
-  // Settings. Falls back to USD.
+  // Locale-aware first-run currency; falls back to EUR. Existing settings in IndexedDB are untouched.
   const defaultCurrency = guessLocaleCurrency();
 
   const defaultSettings: Settings = {

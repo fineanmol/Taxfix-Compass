@@ -2,28 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ---- Semantic theme tokens (Quanto-style blue-teal; R G B triples) ---- */
+/* ---- Semantic theme tokens (Taxfix warm neutrals + green; R G B triples) ---- */
 :root {
-  --bg: 237 241 245;        /* light: cool grey-blue */
-  --bg-grad: 250 252 254;   /* gradient top tint */
-  --surface: 255 255 255;   /* cards */
-  --surface-2: 232 237 242; /* subtle raised */
-  --line: 221 227 234;      /* borders/dividers */
-  --content: 20 28 38;      /* deep navy text */
-  --muted: 96 108 122;      /* secondary text */
-  --faint: 148 160 174;     /* tertiary text */
+  --bg: 253 248 242;
+  --bg-grad: 236 255 199;
+  --surface: 255 255 255;
+  --surface-2: 234 224 215;
+  --line: 221 212 203;
+  --content: 12 11 10;
+  --muted: 96 90 84;
+  --faint: 154 146 136;
   color-scheme: light;
 }
 
 .dark {
-  --bg: 13 19 27;           /* near-black navy (gradient bottom) */
-  --bg-grad: 36 52 71;      /* blue-teal gradient top (#243447) */
-  --surface: 26 34 45;      /* elevated cards */
-  --surface-2: 38 48 61;    /* raised chips */
-  --line: 48 60 74;         /* borders */
-  --content: 236 241 246;   /* near-white text */
-  --muted: 150 165 180;     /* secondary text */
-  --faint: 110 126 142;     /* tertiary text */
+  --bg: 21 70 24; /* evergreen veryDark #154618 */
+  --bg-grad: 54 137 59; /* evergreen dark #36893B */
+  --surface: 28 42 30;
+  --surface-2: 38 56 40;
+  --line: 54 72 56;
+  --content: 253 248 242; /* offwhite light */
+  --muted: 234 224 215; /* offwhite calm */
+  --faint: 154 146 136; /* offwhite vivid */
   color-scheme: dark;
 }
 

@@ -14,7 +14,7 @@ import {
 import { useAccounts, useTransactionsInRange, useCategories } from "@/hooks/useData";
 import { useSettings } from "@/store/useSettings";
 import { accountBalance } from "@/lib/calc";
-import { formatMoney, maskMoney, CURRENCIES } from "@/lib/money";
+import { CURRENCIES, DEFAULT_CURRENCY, formatMoney, maskMoney } from "@/lib/money";
 import { PageHeader, IconButton } from "@/components/ui";
 import {
   addAccount,
@@ -30,7 +30,7 @@ const ACCOUNT_TYPES: AccountType[] = ["cash", "checking", "savings", "credit", "
 
 const TYPE_META: Record<AccountType, { icon: LucideIcon; color: string }> = {
   cash: { icon: Banknote, color: "#34C759" },
-  checking: { icon: Landmark, color: "#0066CC" },
+  checking: { icon: Landmark, color: "#36893B" },
   savings: { icon: PiggyBank, color: "#FF9500" },
   credit: { icon: CreditCard, color: "#AF52DE" },
   other: { icon: Wallet, color: "#8E8E93" },
@@ -44,7 +44,7 @@ export default function Accounts() {
   const allTx = useTransactionsInRange(0, now);
 
   const hide = settings?.hideBalances ?? false;
-  const defaultCurrency = settings?.currency ?? "USD";
+  const defaultCurrency = settings?.currency ?? DEFAULT_CURRENCY;
 
   const [showAdd, setShowAdd] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
@@ -253,7 +253,7 @@ function TransferSheet({
   async function ensureTransferCategory(): Promise<string> {
     const existing = categories.find((c) => c.name === "Transfer");
     if (existing) return existing.id;
-    return addCategory({ name: "Transfer", icon: "🔄", color: "#0066cc", type: "expense" });
+    return addCategory({ name: "Transfer", icon: "🔄", color: "#36893B", type: "expense" });
   }
 
   return (

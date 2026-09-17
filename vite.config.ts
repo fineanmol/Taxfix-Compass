@@ -11,13 +11,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.svg", "apple-touch-icon.png"],
+      includeAssets: ["favicon.svg", "apple-touch-icon.png", "logo.jpg"],
       manifest: {
         name: "Spend — Expense Tracker",
         short_name: "Spend",
         description: "Privacy-first manual expense tracker. Your data stays on your device.",
-        theme_color: "#0066cc",
-        background_color: "#f5f5f7",
+        theme_color: "#36893B",
+        background_color: "#FDF8F2",
         display: "standalone",
         orientation: "portrait",
         start_url: "/",
