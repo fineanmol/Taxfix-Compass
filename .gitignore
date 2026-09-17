@@ -6,3 +6,7 @@ dist-ssr
 .env.local
 .DS_Store
 .vite
+
+# Personal bank statements and phone screenshots of real spend
+consolidated_statement*
+/IMG_*.png
