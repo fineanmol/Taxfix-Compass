@@ -2,9 +2,10 @@ import type { ThemePref } from "@/db/types";
 
 const mq = () => window.matchMedia("(prefers-color-scheme: dark)");
 
-/** Resolve a preference to the actual dark boolean. */
+/** Resolve a preference to the actual dark boolean.
+ *  "system" follows light/default (white pages). Dark is opt-in only,
+ *  so the Taxfix evergreen fill is not applied from OS dark mode. */
 export function isDark(pref: ThemePref): boolean {
-  if (pref === "system") return mq().matches;
   return pref === "dark";
 }
 
@@ -13,7 +14,7 @@ export function applyTheme(pref: ThemePref): void {
   const dark = isDark(pref);
   document.documentElement.classList.toggle("dark", dark);
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute("content", dark ? "#154618" : "#36893B");
+  if (meta) meta.setAttribute("content", dark ? "#154618" : "#ffffff");
 }
 
 /** Re-apply on OS theme change while in "system" mode. Returns an unsubscribe fn. */

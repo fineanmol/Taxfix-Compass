@@ -87,7 +87,7 @@ export async function ensureSeeded(): Promise<void> {
     monthStartDay: 1,
     hideBalances: false,
     syncEnabled: false,
-    theme: "system",
+    theme: "light",
   };
 
   const defaultAccount: Account = {

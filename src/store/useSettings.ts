@@ -16,8 +16,13 @@ export const useSettings = create<SettingsState>((set, get) => ({
   load: async () => {
     const s = await db.settings.get("app");
     if (s) {
-      set({ settings: s });
-      applyTheme(s.theme);
+      // "system" used to follow OS dark and paint the evergreen page fill.
+      // Default chrome is white; persist light so Settings matches what you see.
+      const theme = s.theme === "system" ? "light" : s.theme;
+      const next = theme === s.theme ? s : { ...s, theme };
+      if (theme !== s.theme) await db.settings.put(next);
+      set({ settings: next });
+      applyTheme(theme);
     }
   },
   update: async (patch) => {

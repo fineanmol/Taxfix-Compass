@@ -4,8 +4,8 @@
 
 /* ---- Semantic theme tokens (Taxfix warm neutrals + green; R G B triples) ---- */
 :root {
-  --bg: 253 248 242;
-  --bg-grad: 236 255 199;
+  --bg: 255 255 255;        /* light: white page background */
+  --bg-grad: 255 255 255;   /* solid white (no lime wash) */
   --surface: 255 255 255;
   --surface-2: 234 224 215;
   --line: 221 212 203;
@@ -31,6 +31,7 @@ html,
 body,
 #root {
   min-height: 100%;
+  background-color: rgb(var(--bg));
 }
 
 body {

@@ -105,7 +105,7 @@ export function TransactionForm({
   }
 
   return (
-    <div className="safe-top flex min-h-full flex-col bg-surface-2">
+    <div className="safe-top flex min-h-full flex-col bg-bg">
       {/* header */}
       <div className="flex items-center justify-between px-4 py-3">
         <button onClick={onCancel} aria-label="Close" className="p-2 text-muted">
@@ -215,7 +215,7 @@ export function TransactionForm({
       )}
 
       {/* keypad */}
-      <div className="safe-bottom mt-auto bg-surface-2 p-3">
+      <div className="safe-bottom mt-auto bg-bg p-3">
         <NumericKeypad value={amount} onChange={setAmount} />
         <button onClick={save} disabled={!canSave} className="btn-primary mt-3 w-full disabled:opacity-40">
           {isEdit ? "Save changes" : `Save ${type}`}

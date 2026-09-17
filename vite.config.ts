@@ -18,7 +18,7 @@ export default defineConfig({
         short_name: "Spend",
         description: "Privacy-first manual expense tracker. Your data stays on your device.",
         theme_color: "#36893B",
-        background_color: "#FDF8F2",
+        background_color: "#ffffff",
         display: "standalone",
         orientation: "portrait",
         start_url: "/",

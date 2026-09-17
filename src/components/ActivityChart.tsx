@@ -42,7 +42,7 @@ export function ActivityChart({
             {/* dashed average line */}
             {avg > 0 && (
               <div
-                className="pointer-events-none absolute inset-x-0 border-t border-dashed border-white/25"
+                className="pointer-events-none absolute inset-x-0 border-t border-dashed border-content/20 dark:border-white/25"
                 style={{ bottom: `${avgPct}%` }}
               />
             )}
@@ -58,11 +58,11 @@ export function ActivityChart({
                     className="relative flex h-full flex-1 items-end justify-center"
                   >
                     {/* faint full-height track */}
-                    <span className="absolute inset-y-0 w-[3px] rounded-full bg-white/[0.06]" />
+                    <span className="absolute inset-y-0 w-[3px] rounded-full bg-content/[0.08] dark:bg-white/[0.06]" />
                     {/* value bar */}
                     {b.value > 0 && (
                       <span
-                        className="relative w-[3px] rounded-full bg-white transition-[height]"
+                        className="relative w-[3px] rounded-full bg-content dark:bg-white transition-[height]"
                         style={{ height: `${Math.max(2, h)}%`, opacity: active !== null && !isActive ? 0.4 : 1 }}
                       />
                     )}

@@ -7,6 +7,10 @@ import { registerSW } from "virtual:pwa-register";
 import { loadSampleData, clearSampleData } from "./lib/sampleData";
 import { applyTheme } from "./lib/theme";
 
+// Default to the light (white) page theme before settings load, so the
+// Taxfix evergreen dark fill is never the first paint.
+applyTheme("light");
+
 // Auto-update the service worker and reload as soon as a new build is ready,
 // so users are never stuck on a stale cached bundle.
 try {
