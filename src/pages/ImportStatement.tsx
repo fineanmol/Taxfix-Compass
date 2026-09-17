@@ -19,7 +19,7 @@ import {
   looksLikeGermanPayslip,
   parseGermanPayslip,
   gridToPayslipLines,
-  MOCK_GERMAN_PAYSLIP_LINES,
+  mockGermanPayslipLines,
 } from "@/lib/payslip";
 
 function skipLabel(reason: SkipReason): string {
@@ -272,7 +272,7 @@ export default function ImportStatement() {
               disabled={busy}
               onClick={async () => {
                 setWarn("");
-                await previewPayslip(MOCK_GERMAN_PAYSLIP_LINES);
+                await previewPayslip(mockGermanPayslipLines());
               }}
               className="w-full rounded-xl border border-line px-4 py-3 text-sm font-semibold text-muted"
             >

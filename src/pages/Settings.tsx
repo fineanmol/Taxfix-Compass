@@ -190,8 +190,9 @@ export default function SettingsPage() {
 
       <Section title="Demo data">
         <p className="py-2 text-xs leading-relaxed text-faint">
-          Loads fictional spend plus a Nordlicht GmbH salary (same figures as the sample payslip).
-          Available in production. Tagged so you can clear it without touching real transactions.
+          Loads a fictional Nordlicht GmbH payslip (€110k gross, Steuerklasse I)
+          for Aug–Sep 2026 plus everyday spend. Tagged so you can clear it without
+          touching real transactions.
         </p>
         <button
           onClick={async () => {

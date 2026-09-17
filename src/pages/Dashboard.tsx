@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Target, Wallet } from "lucide-react";
 import dayjs from "dayjs";
@@ -11,6 +11,7 @@ import { useSettings } from "@/store/useSettings";
 import { spendByCategory, totals, percentChange } from "@/lib/calc";
 import { formatMoney, maskMoney } from "@/lib/money";
 import { DemoDataCta } from "@/components/DemoDataCta";
+import { isPayrollCategoryName, payrollDisplayRank } from "@/lib/payroll";
 
 export default function Summary() {
   const navigate = useNavigate();
@@ -40,7 +41,28 @@ export default function Summary() {
   const prevExpense = totals(prevTxs).expense;
   const expensePct = percentChange(expense, prevExpense);
   const slices = spendByCategory(txs);
-  const recent = [...txs].sort((a, b) => b.date - a.date).slice(0, 8);
+  const payrollTxs = useMemo(() => {
+    return txs
+      .filter((t) => {
+        const cat = categories.find((c) => c.id === t.categoryId);
+        return isPayrollCategoryName(cat?.name);
+      })
+      .sort((a, b) => {
+        const ca = categories.find((c) => c.id === a.categoryId)?.name;
+        const cb = categories.find((c) => c.id === b.categoryId)?.name;
+        const ra = payrollDisplayRank(ca);
+        const rb = payrollDisplayRank(cb);
+        if (ra !== rb) return ra - rb;
+        return b.amount - a.amount;
+      });
+  }, [txs, categories]);
+  const payrollIncome = payrollTxs.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+  const recent = useMemo(() => {
+    const rest = txs
+      .filter((t) => !payrollTxs.some((p) => p.id === t.id))
+      .sort((a, b) => b.date - a.date);
+    return [...payrollTxs, ...rest].slice(0, 12);
+  }, [txs, payrollTxs]);
 
   const fmt = (n: number) => (hide ? maskMoney(formatMoney(n, currency)) : formatMoney(n, currency));
 
@@ -66,6 +88,24 @@ export default function Summary() {
           {hide ? <EyeOff size={20} /> : <Eye size={20} />}
         </button>
       </header>
+
+      {payrollTxs.length > 0 && (
+        <section className="card overflow-hidden p-1 ring-2 ring-brand-500/30">
+          <div className="flex items-center justify-between px-3 py-2.5">
+            <h2 className="text-sm font-semibold text-content">Payroll · {start.format("MMM")}</h2>
+            <span className="text-sm font-semibold text-mint">{fmt(payrollIncome)}</span>
+          </div>
+          {payrollTxs.map((tx) => (
+            <TransactionRow
+              key={tx.id}
+              tx={tx}
+              category={categories.find((c) => c.id === tx.categoryId)}
+              hideBalances={hide}
+              onClick={() => navigate(`/edit/${tx.id}`)}
+            />
+          ))}
+        </section>
+      )}
 
       {/* donut leads with 'Expenses this <period>' + comparison, like Quanto */}
       <div className="card p-4">

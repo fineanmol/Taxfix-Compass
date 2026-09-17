@@ -2,6 +2,7 @@ import { db } from "@/db/db";
 import type { Account, Category, Settings } from "@/db/types";
 import { uid } from "./id";
 import { CURRENCIES } from "./money";
+import { PAYROLL_EXPENSE_CATEGORIES, PAYROLL_INCOME_CATEGORIES } from "./payroll";
 
 // region → currency, limited to the currencies the app supports
 const REGION_CURRENCY: Record<string, string> = {
@@ -49,11 +50,13 @@ const DEFAULT_EXPENSE_CATEGORIES: Array<Pick<Category, "name" | "icon" | "color"
   { name: "Personal Care", icon: "💇", color: "#FF6482" },
   { name: "Fuel", icon: "⛽", color: "#8E8E93" },
   { name: "Taxes", icon: "🏛️", color: "#636366" },
+  ...PAYROLL_EXPENSE_CATEGORIES,
   { name: "Other", icon: "📦", color: "#8E8E93" },
 ];
 
 const DEFAULT_INCOME_CATEGORIES: Array<Pick<Category, "name" | "icon" | "color">> = [
-  { name: "Salary", icon: "💰", color: "#34C759" },
+  ...PAYROLL_INCOME_CATEGORIES,
+  { name: "Salary", icon: "💰", color: "#32D74B" },
   { name: "Freelance", icon: "💼", color: "#0066CC" },
   { name: "Business", icon: "🏢", color: "#5856D6" },
   { name: "Investments", icon: "📈", color: "#00C7BE" },

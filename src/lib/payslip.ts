@@ -140,17 +140,17 @@ const SPECS: Spec[] = [
   {
     kind: "net",
     re: /auszahlungsbetrag|nettoverdienst|netto[- ]?bez[uü]ge|überweisung(?:sbetrag)?|auszahlung(?!\s*ag)/i,
-    description: "Net salary (Auszahlung)",
+    description: "Income",
     type: "income",
   },
   { kind: "gross", re: /brutto[- ]?bez[uü]ge|gesamtbrutto|steuerbrutto|^brutto\b/i, description: "Gross", type: "income" },
-  { kind: "lohnsteuer", re: /lohnsteuer(?!\s*brutto)/i, description: "Lohnsteuer", type: "expense" },
-  { kind: "soli", re: /solidarit/i, description: "Solidaritätszuschlag", type: "expense" },
-  { kind: "kirche", re: /kirchensteuer/i, description: "Kirchensteuer", type: "expense" },
-  { kind: "rv", re: /rentenversicherung|\brv[- ]?(?:beitrag|an)\b/i, description: "Rentenversicherung (AN)", type: "expense" },
-  { kind: "av", re: /arbeitslosenversicherung|\bav[- ]?(?:beitrag|an)\b/i, description: "Arbeitslosenversicherung (AN)", type: "expense" },
-  { kind: "kv", re: /krankenversicherung|\bkv[- ]?(?:beitrag|an)\b/i, description: "Krankenversicherung (AN)", type: "expense" },
-  { kind: "pv", re: /pflegeversicherung|\bpv[- ]?(?:beitrag|an)\b/i, description: "Pflegeversicherung (AN)", type: "expense" },
+  { kind: "lohnsteuer", re: /lohnsteuer(?!\s*brutto)/i, description: "Income Tax", type: "expense" },
+  { kind: "soli", re: /solidarit/i, description: "Solidarity Surcharge", type: "expense" },
+  { kind: "kirche", re: /kirchensteuer/i, description: "Church Tax", type: "expense" },
+  { kind: "rv", re: /rentenversicherung|\brv[- ]?(?:beitrag|an)\b/i, description: "Pension Insurance", type: "expense" },
+  { kind: "av", re: /arbeitslosenversicherung|\bav[- ]?(?:beitrag|an)\b/i, description: "Unemployment Insurance", type: "expense" },
+  { kind: "kv", re: /krankenversicherung|\bkv[- ]?(?:beitrag|an)\b/i, description: "Health Insurance", type: "expense" },
+  { kind: "pv", re: /pflegeversicherung|\bpv[- ]?(?:beitrag|an)\b/i, description: "Care Insurance", type: "expense" },
 ];
 
 function skipLine(line: string): boolean {
@@ -165,10 +165,13 @@ function skipLine(line: string): boolean {
 
 function pickAmount(line: string, kind: Kind): number | null {
   const amts = amountsIn(line);
-  if (!amts.length) return null;
-  // DATEV SV lines often list AN then AG — take the first (employee) share.
-  if (kind === "rv" || kind === "av" || kind === "kv" || kind === "pv") return amts[0];
-  return amts[amts.length - 1];
+  // Contribution rates print as 9,00% next to the euro amount — ignore tiny % figures.
+  const money = amts.filter((n) => n >= 20);
+  const use = money.length ? money : amts;
+  if (!use.length) return null;
+  // DATEV SV lines often list AN then AG — take the first euro amount.
+  if (kind === "rv" || kind === "av" || kind === "kv" || kind === "pv") return use[0];
+  return use[use.length - 1];
 }
 
 export interface PayslipParseResult {
@@ -210,14 +213,14 @@ export function parseGermanPayslip(lines: string[]): PayslipParseResult {
     rows.push({ date: periodEnd, amount, type, description });
   };
 
-  push("net", "Net salary (Auszahlung)", "income");
-  push("lohnsteuer", "Lohnsteuer", "expense");
-  push("soli", "Solidaritätszuschlag", "expense");
-  push("kirche", "Kirchensteuer", "expense");
-  push("rv", "Rentenversicherung (AN)", "expense");
-  push("av", "Arbeitslosenversicherung (AN)", "expense");
-  push("kv", "Krankenversicherung (AN)", "expense");
-  push("pv", "Pflegeversicherung (AN)", "expense");
+  push("net", "Income", "income");
+  push("lohnsteuer", "Income Tax", "expense");
+  push("soli", "Solidarity Surcharge", "expense");
+  push("kirche", "Church Tax", "expense");
+  push("rv", "Pension Insurance", "expense");
+  push("av", "Unemployment Insurance", "expense");
+  push("kv", "Health Insurance", "expense");
+  push("pv", "Care Insurance", "expense");
 
   return { rows, periodEnd, matched };
 }
@@ -226,31 +229,50 @@ export function gridToPayslipLines(grid: string[][]): string[] {
   return grid.map((r) => r.filter((c) => c.trim()).join(" ")).filter(Boolean);
 }
 
-/** Fictional DATEV-style slip for testing — no real personal data. */
-export const MOCK_GERMAN_PAYSLIP_LINES: string[] = `
+/** Fictional DATEV-style slip: €110k gross / year, Steuerklasse I, 2026 rates. */
+export function mockGermanPayslipLines(ref: dayjs.Dayjs = dayjs()): string[] {
+  const y = ref.year();
+  const m = ref.month();
+  const start = dayjs(new Date(y, m, 1, 12));
+  const end = dayjs(new Date(y, m + 1, 0, 12));
+  const d = (x: dayjs.Dayjs) => x.format("DD.MM.YYYY");
+  return `
 Nordlicht GmbH
 Musterstraße 1
 10115 Berlin
 
 Entgeltabrechnung
-Abrechnungszeitraum: 01.07.2026 - 31.07.2026
-Personalnr. 10042
-Steuerklasse I
+Steuerklasse I · Konfession keine · Kinderfreibetrag 0,0
 
-Bezeichnung                         Betrag
-Grundgehalt                       3.800,00
-Brutto-Bezüge                     3.800,00
+Abrechnungszeitraum: ${d(start)} - ${d(end)}
+Zahltag ${d(end)}
 
-Lohnsteuer                          512,41
-Solidaritätszuschlag                 28,18
-Rentenversicherung AN               353,40
-Arbeitslosenversicherung AN          49,40
-Krankenversicherung AN              304,00
-Pflegeversicherung AN                76,00
+Jahreszielgehalt brutto 110.000,00 EUR  (mtl. 9.166,67)
 
-Rentenversicherung AG               353,40
-Krankenversicherung AG              304,00
+Bezeichnung                                    Betrag
+Grundgehalt                                  9.166,67
+Brutto-Bezüge                                9.166,67
 
-Netto-Bezüge / Auszahlungsbetrag  2.476,61
-Zahltag 31.07.2026
+Steuerbrutto                                 9.166,67
+SV-Brutto RV/AV (BBG 8.450,00)               8.450,00
+SV-Brutto KV/PV (BBG 5.812,50)               5.812,50
+
+Lohnsteuer                                   1.891,50
+Solidaritätszuschlag                            27,25
+Kirchensteuer                                    0,00
+
+Rentenversicherung AN 9,30%                    785,85
+Arbeitslosenversicherung AN 1,30%              109,85
+Krankenversicherung AN 9,00%                   523,13
+Pflegeversicherung AN 2,40%                    139,50
+
+Rentenversicherung AG                          785,85
+Arbeitslosenversicherung AG                    109,85
+Krankenversicherung AG                         523,13
+Pflegeversicherung AG                          139,50
+
+Netto-Bezüge / Auszahlungsbetrag             5.689,59
 `.trim().split("\n");
+}
+
+export const MOCK_GERMAN_PAYSLIP_LINES = mockGermanPayslipLines();
