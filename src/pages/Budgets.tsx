@@ -24,7 +24,7 @@ export default function Budgets() {
   const monthTx = useTransactionsInRange(start, end);
 
   const hide = settings?.hideBalances ?? false;
-  const currency = settings?.currency ?? "USD";
+  const currency = settings?.currency ?? "EUR";
   const [showAdd, setShowAdd] = useState(false);
 
   const fmt = (n: number) => (hide ? maskMoney(formatMoney(n, currency)) : formatMoney(n, currency));

@@ -17,7 +17,7 @@ import {
 } from "@/hooks/useData";
 import { useSettings } from "@/store/useSettings";
 import { fmtDayHeader } from "@/lib/dates";
-import { formatMoney, maskMoney } from "@/lib/money";
+import { DEFAULT_CURRENCY, formatMoney, maskMoney } from "@/lib/money";
 import { percentChange } from "@/lib/calc";
 import { deleteTransaction } from "@/db/mutations";
 import type { Transaction } from "@/db/types";
@@ -66,7 +66,7 @@ export default function Activity() {
   const prevTxs = useTransactionsInRange(prevStart.valueOf(), prevEnd.valueOf());
 
   const hide = settings?.hideBalances ?? false;
-  const currency = settings?.currency ?? "USD";
+  const currency = settings?.currency ?? DEFAULT_CURRENCY;
 
   const mq = q.trim().toLowerCase();
   const catName = useMemo(

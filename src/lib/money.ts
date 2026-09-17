@@ -4,9 +4,12 @@ export interface CurrencyMeta {
   name: string;
 }
 
+/** Default for new installs and UI fallbacks when settings are not loaded yet. */
+export const DEFAULT_CURRENCY = "EUR";
+
 export const CURRENCIES: CurrencyMeta[] = [
-  { code: "USD", symbol: "$", name: "US Dollar" },
   { code: "EUR", symbol: "€", name: "Euro" },
+  { code: "USD", symbol: "$", name: "US Dollar" },
   { code: "GBP", symbol: "£", name: "British Pound" },
   { code: "INR", symbol: "₹", name: "Indian Rupee" },
   { code: "JPY", symbol: "¥", name: "Japanese Yen" },
@@ -22,7 +25,7 @@ export function currencySymbol(code: string): string {
 }
 
 /** Format an amount in the given currency using the platform's Intl. */
-export function formatMoney(amount: number, currency = "USD"): string {
+export function formatMoney(amount: number, currency = DEFAULT_CURRENCY): string {
   try {
     return new Intl.NumberFormat(undefined, {
       style: "currency",

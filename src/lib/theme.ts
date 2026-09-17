@@ -13,7 +13,7 @@ export function applyTheme(pref: ThemePref): void {
   const dark = isDark(pref);
   document.documentElement.classList.toggle("dark", dark);
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute("content", dark ? "#000000" : "#0066cc");
+  if (meta) meta.setAttribute("content", dark ? "#154618" : "#36893B");
 }
 
 /** Re-apply on OS theme change while in "system" mode. Returns an unsubscribe fn. */

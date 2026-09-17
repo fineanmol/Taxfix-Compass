@@ -20,7 +20,7 @@ export default function Groups() {
   const [creating, setCreating] = useState(false);
 
   const hide = settings?.hideBalances ?? false;
-  const currency = settings?.currency ?? "USD";
+  const currency = settings?.currency ?? "EUR";
 
   // spend in the last 30 days per group
   const now = useMemo(() => Date.now(), []);
@@ -107,7 +107,7 @@ export default function Groups() {
   );
 }
 
-const GROUP_COLORS = ["#0066CC", "#34C759", "#FF9500", "#AF52DE", "#FF2D55", "#00C7BE", "#5856D6", "#8E8E93"];
+const GROUP_COLORS = ["#36893B", "#34C759", "#FF9500", "#AF52DE", "#FF2D55", "#00C7BE", "#5856D6", "#8E8E93"];
 
 function GroupSheet({
   group,

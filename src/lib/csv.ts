@@ -113,7 +113,7 @@ export async function importCsv(text: string): Promise<ImportResult> {
     }
     const catName = (cols[idx("category")] ?? "Other").trim();
     const accName = (cols[idx("account")] ?? accounts[0]?.name ?? "Cash").trim();
-    const currency = (cols[idx("currency")] ?? accounts[0]?.currency ?? "USD").trim() || "USD";
+    const currency = (cols[idx("currency")] ?? accounts[0]?.currency ?? "EUR").trim() || "EUR";
 
     if (!catByName.has(catName.toLowerCase()))
       toCreateCats.set(catName.toLowerCase(), { name: catName, type: type as "expense" | "income" });
@@ -125,7 +125,7 @@ export async function importCsv(text: string): Promise<ImportResult> {
   await db.transaction("rw", db.categories, db.accounts, async () => {
     let order = categories.length;
     for (const c of toCreateCats.values()) {
-      const cat = { id: uid(), name: c.name, icon: "📦", color: "#0066cc", type: c.type, order: order++ };
+      const cat = { id: uid(), name: c.name, icon: "📦", color: "#36893B", type: c.type, order: order++ };
       await db.categories.put(cat);
       catByName.set(c.name.toLowerCase(), cat);
     }

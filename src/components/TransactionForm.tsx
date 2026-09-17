@@ -44,7 +44,7 @@ export function TransactionForm({
   const [date, setDate] = useState(dayjs(initial?.date ?? Date.now()).format("YYYY-MM-DD"));
   const [saving, setSaving] = useState(false);
 
-  const currency = initial?.currency ?? settings?.currency ?? "USD";
+  const currency = initial?.currency ?? settings?.currency ?? "EUR";
   const visibleCategories = useMemo(
     () => categories.filter((c) => c.type === type),
     [categories, type]
