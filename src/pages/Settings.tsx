@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Download, Upload, RefreshCw, Repeat, Plus, Trash2, Eye, EyeOff, Sun, Moon, Monitor, Sparkles, Shapes, Wallet, ChevronRight, Zap, Landmark, Smartphone, Layers, AlertOctagon } from "lucide-react";
+import { Download, Upload, RefreshCw, Repeat, Plus, Trash2, Eye, EyeOff, Sun, Moon, Monitor, Sparkles, Shapes, Wallet, ChevronRight, Zap, Landmark, Smartphone, Layers, AlertOctagon, Receipt } from "lucide-react";
 import { useSettings } from "@/store/useSettings";
 import { useAccounts, useCategories, useRecurring } from "@/hooks/useData";
 import { CURRENCIES } from "@/lib/money";
 import { downloadCsv, importCsv } from "@/lib/csv";
-import { loadSampleData } from "@/lib/sampleData";
+import { loadSampleData, clearSampleData } from "@/lib/sampleData";
 import { syncConfigured } from "@/lib/sync";
 import { useSync } from "@/store/useSync";
 import { addRecurring, deleteRecurring, relabelCurrency, deleteAllTransactions, resetAllData } from "@/db/mutations";
@@ -168,6 +168,14 @@ export default function SettingsPage() {
           <span className="flex-1 text-sm text-content">Import bank / card statement</span>
           <ChevronRight size={18} className="text-faint" />
         </button>
+        <button
+          onClick={() => navigate("/import?kind=payslip")}
+          className="flex w-full items-center gap-3 py-2.5 text-left"
+        >
+          <Receipt size={18} className="text-brand-600" />
+          <span className="flex-1 text-sm text-content">Import German payslip</span>
+          <ChevronRight size={18} className="text-faint" />
+        </button>
         <button onClick={downloadCsv} className="flex w-full items-center gap-3 py-2.5 text-left">
           <Download size={18} className="text-brand-600" />
           <span className="text-sm text-content">Export CSV</span>
@@ -178,19 +186,38 @@ export default function SettingsPage() {
         </button>
         {importMsg && <p className="text-xs text-mint">{importMsg}</p>}
         <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={onImport} className="hidden" />
-        {/* dev-only: never shipped in production builds */}
-        {import.meta.env.DEV && (
-          <button
-            onClick={async () => {
-              const n = await loadSampleData();
-              setImportMsg(`Loaded ${n} sample transactions`);
-            }}
-            className="flex w-full items-center gap-3 py-2.5 text-left"
-          >
-            <Sparkles size={18} className="text-brand-600" />
-            <span className="text-sm text-content">Load sample data (dev)</span>
-          </button>
-        )}
+      </Section>
+
+      <Section title="Demo data">
+        <p className="py-2 text-xs leading-relaxed text-faint">
+          Loads fictional spend plus a Nordlicht GmbH salary (same figures as the sample payslip).
+          Available in production. Tagged so you can clear it without touching real transactions.
+        </p>
+        <button
+          onClick={async () => {
+            const n = await loadSampleData();
+            await useSettings.getState().load();
+            setImportMsg(`Loaded ${n} demo transactions`);
+          }}
+          className="flex w-full items-center gap-3 py-2.5 text-left"
+        >
+          <Sparkles size={18} className="text-brand-600" />
+          <span className="flex-1 text-sm text-content">
+            {settings.mockDataMode ? "Reload demo data" : "Load demo data"}
+          </span>
+        </button>
+        <button
+          onClick={async () => {
+            const n = await clearSampleData();
+            await useSettings.getState().load();
+            setImportMsg(n ? `Removed ${n} demo transactions` : "No demo data to clear");
+          }}
+          className="flex w-full items-center gap-3 py-2.5 text-left"
+        >
+          <Trash2 size={18} className="text-muted" />
+          <span className="text-sm text-content">Clear demo data</span>
+        </button>
+        {importMsg && <p className="py-2 text-xs text-mint">{importMsg}</p>}
       </Section>
 
       {/* sync */}

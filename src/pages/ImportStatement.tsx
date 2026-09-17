@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, FileUp, CheckCircle2, AlertTriangle } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft, FileUp, CheckCircle2, AlertTriangle, Landmark, Receipt } from "lucide-react";
 import dayjs from "dayjs";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { useAccounts, useCategories } from "@/hooks/useData";
@@ -15,6 +15,12 @@ import {
   type ParsedRow,
 } from "@/lib/statement";
 import { buildPreview, commitImport, type ImportPreviewRow, type SkipReason } from "@/lib/importer";
+import {
+  looksLikeGermanPayslip,
+  parseGermanPayslip,
+  gridToPayslipLines,
+  MOCK_GERMAN_PAYSLIP_LINES,
+} from "@/lib/payslip";
 
 function skipLabel(reason: SkipReason): string {
   switch (reason) {
@@ -28,14 +34,17 @@ function skipLabel(reason: SkipReason): string {
 }
 
 type Step = "pick" | "map" | "preview" | "done";
+type ImportKind = "bank" | "payslip";
 
 export default function ImportStatement() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const accounts = useAccounts();
   const categories = useCategories();
   const settings = useSettings((s) => s.settings);
 
   const [step, setStep] = useState<Step>("pick");
+  const [kind, setKind] = useState<ImportKind>(params.get("kind") === "payslip" ? "payslip" : "bank");
   const [accountId, setAccountId] = useState("");
   const [csvGrid, setCsvGrid] = useState<{ header: string[]; rows: string[][] } | null>(null);
   const [mapping, setMapping] = useState<CsvMapping>({ dateCol: 0, amountCol: 1, descCol: 2 });
@@ -51,6 +60,17 @@ export default function ImportStatement() {
   const [busy, setBusy] = useState(false);
   const [warn, setWarn] = useState("");
 
+  async function previewPayslip(lines: string[]) {
+    const parsed = parseGermanPayslip(lines);
+    if (parsed.rows.length === 0) {
+      setWarn(
+        "Couldn't find net pay or deductions on this payslip. It may be a scan without a text layer, or an unusual layout."
+      );
+      return;
+    }
+    await goPreview(parsed.rows);
+  }
+
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -65,13 +85,18 @@ export default function ImportStatement() {
         const { extractPdfLines, parsePdfLines } = await import("@/lib/pdf");
         const buf = await file.arrayBuffer();
         const lines = await extractPdfLines(buf);
-        const { rows, matchedLines } = parsePdfLines(lines);
-        if (matchedLines === 0) {
-          setWarn(
-            "Couldn't find transactions in this PDF. It may be a scanned/image statement (no text layer), or an unusual layout. Try the CSV/OFX export from your bank instead."
-          );
+        const blob = lines.join("\n");
+        if (kind === "payslip" || looksLikeGermanPayslip(blob)) {
+          await previewPayslip(lines);
         } else {
-          await goPreview(rows);
+          const { rows, matchedLines } = parsePdfLines(lines);
+          if (matchedLines === 0) {
+            setWarn(
+              "Couldn't find transactions in this PDF. It may be a scanned/image statement (no text layer), or an unusual layout. Try the CSV/OFX export from your bank instead."
+            );
+          } else {
+            await goPreview(rows);
+          }
         }
       } catch {
         setWarn("Couldn't read this PDF. If it's password-protected, remove the password and retry.");
@@ -81,22 +106,28 @@ export default function ImportStatement() {
       return;
     }
 
-    // Excel: parse to a grid, then reuse the CSV column-mapping flow
+    // Excel: payslip uses the raw grid; bank statements reuse CSV column mapping
     if (/\.(xlsx|xls)$/i.test(file.name) || /sheet|excel/i.test(file.type)) {
       setBusy(true);
       try {
-        const [{ parseXlsxGrid }, XLSX] = await Promise.all([
+        const [{ parseXlsxRawGrid, gridFromRows }, XLSX] = await Promise.all([
           import("@/lib/statement"),
           import("xlsx"),
         ]);
         const buf = await file.arrayBuffer();
-        const grid = parseXlsxGrid(buf, XLSX);
-        if (grid.rows.length === 0) {
-          setWarn("No rows found in this spreadsheet. Check it's the statement sheet, not a summary tab.");
+        const rawGrid = parseXlsxRawGrid(buf, XLSX);
+        const rawText = rawGrid.flat().join(" ");
+        if (kind === "payslip" || looksLikeGermanPayslip(rawText)) {
+          await previewPayslip(gridToPayslipLines(rawGrid));
         } else {
-          setCsvGrid(grid);
-          setMapping(guessMapping(grid.header));
-          setStep("map");
+          const grid = gridFromRows(rawGrid);
+          if (grid.rows.length === 0) {
+            setWarn("No rows found in this spreadsheet. Check it's the statement sheet, not a summary tab.");
+          } else {
+            setCsvGrid(grid);
+            setMapping(guessMapping(grid.header));
+            setStep("map");
+          }
         }
       } catch {
         setWarn("Couldn't read this spreadsheet. Try exporting it as CSV instead.");
@@ -107,6 +138,12 @@ export default function ImportStatement() {
     }
 
     const text = await file.text();
+    if (kind === "payslip" || looksLikeGermanPayslip(text)) {
+      const grid = parseCsvGrid(text);
+      const lines = gridToPayslipLines([grid.header, ...grid.rows]);
+      await previewPayslip(lines.length ? lines : text.split(/\r?\n/));
+      return;
+    }
     if (detectFormat(file.name, text) === "ofx") {
       await goPreview(parseOfx(text));
     } else {
@@ -146,7 +183,9 @@ export default function ImportStatement() {
         <button onClick={() => navigate(-1)} className="flex h-9 w-9 items-center justify-center rounded-full bg-surface shadow-card">
           <ArrowLeft size={18} />
         </button>
-        <h1 className="text-2xl font-bold tracking-tight text-content">Import statement</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-content">
+          {kind === "payslip" ? "Import payslip" : "Import statement"}
+        </h1>
       </div>
 
       {/* account target (shared across steps) */}
@@ -174,6 +213,31 @@ export default function ImportStatement() {
 
       {step === "pick" && (
         <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setKind("bank")}
+              className={`card flex flex-col items-start gap-1 p-3 text-left ${
+                kind === "bank" ? "ring-2 ring-brand-600" : ""
+              }`}
+            >
+              <Landmark size={18} className="text-brand-600" />
+              <span className="text-sm font-semibold text-content">Bank / card</span>
+              <span className="text-[11px] leading-snug text-faint">Excel, PDF, CSV, OFX</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setKind("payslip")}
+              className={`card flex flex-col items-start gap-1 p-3 text-left ${
+                kind === "payslip" ? "ring-2 ring-brand-600" : ""
+              }`}
+            >
+              <Receipt size={18} className="text-brand-600" />
+              <span className="text-sm font-semibold text-content">German payslip</span>
+              <span className="text-[11px] leading-snug text-faint">Gehaltsabrechnung PDF/Excel</span>
+            </button>
+          </div>
+
           <label className="card flex cursor-pointer flex-col items-center gap-2 border border-dashed border-line p-8 text-center">
             {busy ? (
               <>
@@ -183,8 +247,14 @@ export default function ImportStatement() {
             ) : (
               <>
                 <FileUp size={30} className="text-brand-600" />
-                <span className="font-semibold text-content">Choose a statement file</span>
-                <span className="text-sm text-faint">PDF, Excel, CSV, or OFX/QFX from your bank or card</span>
+                <span className="font-semibold text-content">
+                  {kind === "payslip" ? "Choose a payslip file" : "Choose a statement file"}
+                </span>
+                <span className="text-sm text-faint">
+                  {kind === "payslip"
+                    ? "PDF or Excel Entgelt-/Gehaltsabrechnung"
+                    : "PDF, Excel, CSV, or OFX/QFX from your bank or card"}
+                </span>
               </>
             )}
             <input
@@ -196,6 +266,20 @@ export default function ImportStatement() {
             />
           </label>
 
+          {kind === "payslip" && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={async () => {
+                setWarn("");
+                await previewPayslip(MOCK_GERMAN_PAYSLIP_LINES);
+              }}
+              className="w-full rounded-xl border border-line px-4 py-3 text-sm font-semibold text-muted"
+            >
+              Try sample German payslip
+            </button>
+          )}
+
           {warn && (
             <div className="flex gap-2 rounded-xl bg-red-500/10 p-3 text-sm text-red-500">
               <AlertTriangle size={18} className="mt-0.5 shrink-0" />
@@ -205,13 +289,22 @@ export default function ImportStatement() {
 
           <div className="rounded-xl bg-surface-2 p-3 text-xs leading-relaxed text-faint">
             <p className="mb-1 font-medium text-muted">How it works</p>
-            <p>
-              Works with <b>text-based PDF</b> statements (most banks &amp; cards), plus{" "}
-              <b>Excel</b> (.xlsx/.xls), CSV, and OFX/QFX. Everything is parsed{" "}
-              <b>on your device</b> — nothing is uploaded. PDF and spreadsheet layouts vary, so
-              review the parsed rows before importing. Scanned/photo statements without a text
-              layer can't be read; use the CSV/OFX export instead.
-            </p>
+            {kind === "payslip" ? (
+              <p>
+                Parses a German <b>Gehalts-/Entgeltabrechnung</b> on your device. It pulls net pay
+                (Auszahlung) as income and employee deductions (Lohnsteuer, Soli, KV/RV/AV/PV) as
+                expenses. Employer (AG) shares are ignored. Layouts vary — review the preview before
+                importing. Scanned PDFs without a text layer can't be read.
+              </p>
+            ) : (
+              <p>
+                Works with <b>text-based PDF</b> statements (most banks &amp; cards), plus{" "}
+                <b>Excel</b> (.xlsx/.xls), CSV, and OFX/QFX. Everything is parsed{" "}
+                <b>on your device</b> — nothing is uploaded. PDF and spreadsheet layouts vary, so
+                review the parsed rows before importing. Scanned/photo statements without a text
+                layer can't be read; use the CSV/OFX export instead.
+              </p>
+            )}
           </div>
         </div>
       )}

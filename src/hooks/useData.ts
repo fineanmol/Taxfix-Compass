@@ -21,6 +21,11 @@ export function useAllTransactions() {
   return useLiveQuery(() => db.transactions.orderBy("date").reverse().toArray(), [], []);
 }
 
+/** undefined while Dexie hydrates so empty-state CTAs don't flash. */
+export function useTransactionCount(): number | undefined {
+  return useLiveQuery(() => db.transactions.count(), []);
+}
+
 export function useBudgets() {
   return useLiveQuery(() => db.budgets.toArray(), [], []);
 }

@@ -6,10 +6,11 @@ import { SpendDonut } from "@/components/SpendDonut";
 import { TransactionRow } from "@/components/TransactionRow";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { MonthPicker } from "@/components/MonthPicker";
-import { useCategories, useTransactionsInRange, useLatestMonthWithData } from "@/hooks/useData";
+import { useCategories, useTransactionsInRange, useLatestMonthWithData, useTransactionCount } from "@/hooks/useData";
 import { useSettings } from "@/store/useSettings";
 import { spendByCategory, totals, percentChange } from "@/lib/calc";
 import { formatMoney, maskMoney } from "@/lib/money";
+import { DemoDataCta } from "@/components/DemoDataCta";
 
 export default function Summary() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function Summary() {
   const toggleHide = useSettings((s) => s.toggleHideBalances);
   const categories = useCategories();
   const latestMonth = useLatestMonthWithData();
+  const txCount = useTransactionCount();
 
   const [month, setMonth] = useState<number | null>(null);
   useEffect(() => {
@@ -44,6 +46,15 @@ export default function Summary() {
 
   return (
     <div className="safe-top space-y-4 px-4 pt-4">
+      {settings?.mockDataMode && (
+        <button
+          type="button"
+          onClick={() => navigate("/settings")}
+          className="w-full rounded-xl bg-surface-2 px-3 py-2 text-center text-xs text-muted"
+        >
+          Demo data is on — tap to manage in Settings
+        </button>
+      )}
       {/* header row: month picker + hide toggle */}
       <header className="flex items-center justify-between">
         <MonthPicker month={activeMonth} onChange={setMonth} />
@@ -146,9 +157,15 @@ export default function Summary() {
         </div>
         <div className="card divide-y divide-line p-1">
           {recent.length === 0 && (
-            <p className="px-3 py-6 text-center text-sm text-faint">
-              No transactions yet. Tap + to add one.
-            </p>
+            txCount === 0 ? (
+              <div className="px-3 py-4">
+                <DemoDataCta />
+              </div>
+            ) : (
+              <p className="px-3 py-6 text-center text-sm text-faint">
+                No transactions yet. Tap + to add one.
+              </p>
+            )
           )}
           {recent.map((tx) => (
             <TransactionRow

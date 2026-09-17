@@ -13,6 +13,7 @@ import {
   useCategories,
   useTransactionsInRange,
   useLatestMonthWithData,
+  useTransactionCount,
 } from "@/hooks/useData";
 import { useSettings } from "@/store/useSettings";
 import { fmtDayHeader } from "@/lib/dates";
@@ -20,6 +21,7 @@ import { formatMoney, maskMoney } from "@/lib/money";
 import { percentChange } from "@/lib/calc";
 import { deleteTransaction } from "@/db/mutations";
 import type { Transaction } from "@/db/types";
+import { DemoDataCta } from "@/components/DemoDataCta";
 
 /** Activity: main screen — monthly bar chart + filters + transaction list. */
 export default function Activity() {
@@ -28,6 +30,7 @@ export default function Activity() {
   const categories = useCategories();
   const accounts = useAccounts();
   const latestMonth = useLatestMonthWithData();
+  const txCount = useTransactionCount();
 
   const [month, setMonth] = useState<number | null>(null);
   useEffect(() => {
@@ -95,6 +98,15 @@ export default function Activity() {
 
   return (
     <div className="safe-top space-y-5 px-4 pt-4">
+      {settings?.mockDataMode && (
+        <button
+          type="button"
+          onClick={() => navigate("/settings")}
+          className="w-full rounded-xl bg-surface-2 px-3 py-2 text-center text-xs text-muted"
+        >
+          Demo data is on — tap to manage in Settings
+        </button>
+      )}
       {/* swipeable top region: header + chart. Swipe right → prev month,
           left → next month (respects the active filters). Heights are fixed so
           only the chart/total content changes — the filters & list below never
@@ -166,7 +178,11 @@ export default function Activity() {
           );
         })}
         {grouped.length === 0 && (
-          <p className="py-6 text-center text-sm text-faint">No transactions match these filters.</p>
+          txCount === 0 ? (
+            <DemoDataCta />
+          ) : (
+            <p className="py-6 text-center text-sm text-faint">No transactions match these filters.</p>
+          )
         )}
       </section>
     </div>

@@ -19,7 +19,9 @@ const KEYWORD_MAP: Array<{ re: RegExp; cat: string }> = [
   { re: /hotel|airbnb|flight|airline|ryanair|easyjet|lufthansa|booking\.com|travel/i, cat: "Travel" },
   { re: /exchanged to|robo portfolio|invest|trading|etf|crypto|advanzia/i, cat: "Investments" },
   // income
-  { re: /salary|payroll|wages|gehalt|lohn|link11|payment from|from .* gmbh/i, cat: "Salary" },
+  { re: /salary|payroll|wages|gehalt|lohn|auszahlung|net salary|link11|payment from|from .* gmbh/i, cat: "Salary" },
+  { re: /krankenversicherung|pflegeversicherung/i, cat: "Health" },
+  { re: /lohnsteuer|solidarit|kirchensteuer|rentenversicherung|arbeitslosenversicherung/i, cat: "Taxes" },
   { re: /refund|erstattung|reimburse|cashback|compensation/i, cat: "Refund" },
   { re: /interest|reward|zinsen/i, cat: "Interest" },
 ];

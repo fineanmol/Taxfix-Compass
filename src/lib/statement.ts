@@ -206,22 +206,30 @@ export function detectFormat(name: string, text: string): "ofx" | "csv" {
  * Requires the `xlsx` lib passed in (lazy-loaded by the caller to keep it out
  * of the main bundle).
  */
-export function parseXlsxGrid(
+/** First sheet as a raw 2D grid (no header detection). Used by payslip import. */
+export function parseXlsxRawGrid(
   buf: ArrayBuffer,
   XLSX: typeof import("xlsx")
-): { header: string[]; rows: string[][] } {
+): string[][] {
   const wb = XLSX.read(buf, { type: "array", cellDates: true });
   const sheet = wb.Sheets[wb.SheetNames[0]];
-  if (!sheet) return { header: [], rows: [] };
+  if (!sheet) return [];
 
-  // rows as arrays; blank cells become ""; dates formatted as YYYY-MM-DD
   const raw = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
     header: 1,
     raw: false,
     dateNF: "yyyy-mm-dd",
     defval: "",
   });
-  const grid = raw.map((r) => r.map((c) => String(c ?? "").trim()));
+  return raw.map((r) => r.map((c) => String(c ?? "").trim()));
+}
+
+export function parseXlsxGrid(
+  buf: ArrayBuffer,
+  XLSX: typeof import("xlsx")
+): { header: string[]; rows: string[][] } {
+  const grid = parseXlsxRawGrid(buf, XLSX);
+  if (!grid.length) return { header: [], rows: [] };
   // reuse the shared transaction-header detection (skips summary preamble)
   return gridFromRows(grid);
 }

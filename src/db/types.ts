@@ -96,4 +96,6 @@ export interface Settings {
   syncEnabled: boolean;
   theme: ThemePref;
   lastSyncAt?: number;
+  /** When true, sample/mock transactions are loaded for testing. */
+  mockDataMode?: boolean;
 }

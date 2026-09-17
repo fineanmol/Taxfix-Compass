@@ -4,7 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
 import { registerSW } from "virtual:pwa-register";
-import { loadSampleData } from "./lib/sampleData";
+import { loadSampleData, clearSampleData } from "./lib/sampleData";
 import { applyTheme } from "./lib/theme";
 
 // Auto-update the service worker and reload as soon as a new build is ready,
@@ -16,9 +16,10 @@ const updateSW = registerSW({
   },
 });
 
-// Dev/testing helpers accessible from the console — dev builds only.
+// Console helpers stay in dev; production uses Settings / empty-state demo data.
 if (import.meta.env.DEV && typeof window !== "undefined") {
   (window as unknown as Record<string, unknown>).__loadSample = loadSampleData;
+  (window as unknown as Record<string, unknown>).__clearSample = clearSampleData;
   (window as unknown as Record<string, unknown>).__applyTheme = applyTheme;
 }
 
