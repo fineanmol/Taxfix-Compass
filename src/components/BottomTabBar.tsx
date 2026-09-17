@@ -1,11 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { Receipt, PieChart, Target, BarChart3, Settings } from "lucide-react";
+import { Receipt, PieChart, Target, Sparkles, Settings } from "lucide-react";
 
 const tabs = [
   { to: "/", label: "Activity", icon: Receipt, end: true },
   { to: "/summary", label: "Summary", icon: PieChart },
   { to: "/budgets", label: "Budget", icon: Target },
-  { to: "/overview", label: "Overview", icon: BarChart3 },
+  { to: "/for-you", label: "For You", icon: Sparkles },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
