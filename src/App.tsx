@@ -11,6 +11,7 @@ import { maybeOfferCurrencyFix } from "./lib/currencyFix";
 import Activity from "./pages/Insights";
 import Summary from "./pages/Dashboard";
 import Overview from "./pages/Overview";
+import ForYou from "./pages/ForYou";
 import AddTransaction from "./pages/AddTransaction";
 import EditTransaction from "./pages/EditTransaction";
 import Transactions from "./pages/Transactions";
@@ -60,8 +61,8 @@ export default function App() {
   const hideTabBar =
     FULLSCREEN.includes(location.pathname) || location.pathname.startsWith("/edit/");
 
-  // show the floating add button on the main tabbed screens
-  const showFab = !hideTabBar;
+  // show the floating add button on the main tabbed screens (hide on For You feed)
+  const showFab = !hideTabBar && location.pathname !== "/for-you";
 
   return (
     <div className="mx-auto flex min-h-full max-w-md flex-col">
@@ -71,6 +72,7 @@ export default function App() {
           <Route path="/" element={<Activity />} />
           <Route path="/summary" element={<Summary />} />
           <Route path="/overview" element={<Overview />} />
+          <Route path="/for-you" element={<ForYou />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/add" element={<AddTransaction />} />
           <Route path="/quick" element={<QuickAdd />} />
